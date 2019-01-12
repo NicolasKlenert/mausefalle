@@ -1,0 +1,6 @@
+.cproject
+.project
+.settings/
+LinkerScript.ld
+New_configuration.cfg
+Debug/
