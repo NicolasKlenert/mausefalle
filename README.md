@@ -36,7 +36,7 @@ See https://help.github.com/articles/cloning-a-repository/ for the instructions 
 
 * TIM1 for the sensors
 * TIM3 for the LEDs
-* TIM6 and TIM7 for the wheels
+* TIM16 and TIM17 for the wheels
 
 # Programming Standards
 
