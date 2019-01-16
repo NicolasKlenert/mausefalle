@@ -9,6 +9,8 @@ See https://help.github.com/articles/cloning-a-repository/ for the instructions 
 * If you want so save a current state of your files (for various reasons), use the command "git add *filename*" to tell git that you want to save the files. With "git commit" you save them.
 * If you want to upload the changes (only do this if your project is stable) use "git push" after a commit.
 
+* To find out which files are different to the local commit on your laptop, type "git status".
+
 # Pin Placement/Use
 
 |    | A           | B           | C            |
@@ -34,4 +36,26 @@ See https://help.github.com/articles/cloning-a-repository/ for the instructions 
 
 * TIM1 for the sensors
 * TIM3 for the LEDs
-* TIM6 and TIM7 for the wheels
+* TIM16 and TIM17 for the wheels
+
+# Programming Standards
+
+All code should be written in English.
+
+* Filenames:
+  * always smallcase
+  * no space
+  * only underscore
+  * Example: lre_led_status
+* Variables:
+  * CamelCase or underscores
+  * Always use names, that say something about the use of the variable
+  * Do not use to generalized names because of the global namespace (don't use counter, use led_status_counter)
+  * Example: status_indicator OR statusIndicator
+* Constants: Everything uppercase
+* Functions:
+  * If your file has to be initialized, the function for this should be called *filename*_init().
+  * CamelCase or underscores
+  * If you have to return an array, the last argument of the function should be the pointer to a buffer array!
+* Scope:
+  * If a variable or function is used by another file (and therefore has to be global) write the variable or the functionheader in the headerfile (filename.h). If it is not used by another file, it should be private and only exist in the codefile (filename.c) NOT in the headerfile
