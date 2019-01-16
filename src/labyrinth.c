@@ -8,29 +8,29 @@
 #include "lre_queue.h"
 #include "labyrinth.h"
 
-void setWalls(uint16_t id, uint16_t bitflag){
+void setWalls(uint16_t id, uint8_t bitflag){
 	cells[id] = ~(~cells[id]|bitflag);
 }
 
-void setGates(uint16_t id,uint16_t bitflag){
+void setGates(uint16_t id,uint8_t bitflag){
 	cells[id] = cells[id] | bitflag;
 }
 
-void setWall(uint16_t id,uint16_t direction){
+void setWall(uint16_t id,uint8_t direction){
 	setWalls(id,1 << direction);
 }
 
-void setGate(uint16_t id,uint16_t direction){
+void setGate(uint16_t id,uint8_t direction){
 	setGates(id,1 << direction);
 }
-uint16_t hasWall(uint16_t id,uint16_t direction){
+uint8_t hasWall(uint16_t id,uint8_t direction){
 	return !hasGate(id,direction);
 }
-uint16_t hasGate(uint16_t id,uint16_t direction){
+uint8_t hasGate(uint16_t id,uint8_t direction){
 	return cells[id] & (1 << direction);
 }
 
-uint16_t getCellId(uint16_t id,uint16_t direction){
+uint16_t getCellId(uint16_t id,uint8_t direction){
 	switch (direction) {
 		case 0:
 			return id - numCols;
@@ -48,16 +48,16 @@ uint16_t getCellId(uint16_t id,uint16_t direction){
 	}
 }
 
-uint16_t inverseDirection(uint16_t direction){
+uint8_t inverseDirection(uint8_t direction){
 	return rotateDirection(direction,2);
 }
 
-uint16_t rotateDirection(uint16_t direction, uint16_t times){
+uint8_t rotateDirection(uint8_t direction, uint8_t times){
 	return (direction+times)%4;
 }
 
-uint16_t getNeighbours(uint16_t id, uint16_t *arr){
-	uint16_t counter = 0;
+uint8_t getNeighbours(uint16_t id, uint16_t *arr){
+	uint8_t counter = 0;
 	if(hasGate(id,DIR_NORTH)){//cells[id] & 0b0001
 		arr[counter] = id - numCols;
 		counter++;
@@ -78,7 +78,7 @@ uint16_t getNeighbours(uint16_t id, uint16_t *arr){
 }
 
 //IMPORTANT: the path is save on the end of the buffer array!
-uint16_t getPath(uint16_t start, uint16_t aim, uint16_t *arr){
+uint8_t getPath(uint16_t start, uint16_t aim, uint16_t *arr){
 	//create queue and an visited array to make a BFS
 	uint16_t size = numRows*numCols;
 	if(sizeof(arr)/sizeof(arr[0]) < size){
@@ -95,7 +95,7 @@ uint16_t getPath(uint16_t start, uint16_t aim, uint16_t *arr){
 	enqueue(queue,start);
 	visited[start] = start;
 
-	uint16_t breaking = FALSE;
+	uint8_t breaking = FALSE;
 	uint16_t item;
 	uint16_t neighbours[4];
 	while(!isEmpty(queue) && !breaking){

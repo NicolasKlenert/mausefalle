@@ -8,8 +8,11 @@
 #include "stm32f0xx.h"
 #include "stm32f072b_discovery.h"
 #include "mouse.h"
+#include "lre_sensor.h"
 
-lre_sensor_init(){
+#define TRIGGERLENGTH	100
+
+void lre_sensor_init(){
 	//initialise echo gpio
 	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOA, ENABLE);
 	GPIO_InitTypeDef gpio_initStruct;
@@ -24,14 +27,14 @@ lre_sensor_init(){
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG,
 	ENABLE);
 	EXTI_InitTypeDef extiInitStruct;
-	extiInitStruct.EXTI_Line = EXTI_Line4 | EXTI_Line5 | EXTI_Line15;
+	extiInitStruct.EXTI_Line = EXTI_Line4| EXTI_Line5 | EXTI_Line15;
 	//TODO: it could be that every EXTI_Line has to be initialized separately
 	extiInitStruct.EXTI_LineCmd = ENABLE;
 	extiInitStruct.EXTI_Mode = EXTI_Mode_Interrupt;
 	extiInitStruct.EXTI_Trigger = EXTI_Trigger_Rising_Falling;
 	EXTI_Init(&extiInitStruct);
 
-	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOA,EXTI_PinSource4 |EXTI_PinSource5 |EXTI_PinSource15);
+	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOA,EXTI_PinSource4|EXTI_PinSource5 |EXTI_PinSource15);
 	//TODO: here you also have to change the PINsource, if every line has to be configured separately
 	NVIC_EnableIRQ(EXTI4_15_IRQn);
 
@@ -41,7 +44,7 @@ lre_sensor_init(){
 	timerInitStruct.TIM_ClockDivision = 0;
 	timerInitStruct.TIM_CounterMode = TIM_CounterMode_Up;
 	timerInitStruct.TIM_Period = 60000 - 1;
-	timerInitStruct.TIM_Prescaler = SystemCoreClock / 1000000 - 1;
+	timerInitStruct.TIM_Prescaler = SystemCoreClock / (1000000 - 1);
 	timerInitStruct.TIM_RepetitionCounter = 0;
 	TIM_TimeBaseInit(TIM1, &timerInitStruct);
 
@@ -72,10 +75,14 @@ lre_sensor_init(){
 	TIM_OC2Init(TIM1, &ocInitStruct);
 	TIM_OC3Init(TIM1, &ocInitStruct);
 	TIM_CtrlPWMOutputs(TIM1, ENABLE);
+
+	mouse_distance[0] = 0;
+	mouse_distance[1] = 0;
+	mouse_distance[2] = 0;
 }
 
-lre_sensor_start(){
-	TIM_SetCompare1(TIM1, 10);
+void lre_sensor_start(){
+	TIM_SetCompare1(TIM1, TRIGGERLENGTH);
 	TIM_Cmd(TIM1, ENABLE);
 }
 
@@ -85,7 +92,7 @@ void EXTI4_15_IRQHandler(void){
 			//steigende Flanke
 			startTime[0] = TIM_GetCounter(TIM1);
 			TIM_SetCompare1(TIM1,0);
-			TIM_SetCompare2(TIM1,10);
+			TIM_SetCompare2(TIM1,TRIGGERLENGTH);
 		}else{
 			//fallende Flanke
 			endTime[0] = TIM_GetCounter(TIM1);
@@ -97,7 +104,7 @@ void EXTI4_15_IRQHandler(void){
 			//steigende Flanke
 			startTime[1] = TIM_GetCounter(TIM1);
 			TIM_SetCompare2(TIM1,0);
-			TIM_SetCompare3(TIM1,10);
+			TIM_SetCompare3(TIM1,TRIGGERLENGTH);
 		}else{
 			//fallende Flanke
 			endTime[1] = TIM_GetCounter(TIM1);
@@ -109,7 +116,7 @@ void EXTI4_15_IRQHandler(void){
 			//steigende Flanke
 			startTime[2] = TIM_GetCounter(TIM1);
 			TIM_SetCompare3(TIM1,0);
-			TIM_SetCompare1(TIM1,10);
+			TIM_SetCompare1(TIM1,TRIGGERLENGTH);
 		}else{
 			//fallende Flanke
 			endTime[2] = TIM_GetCounter(TIM1);

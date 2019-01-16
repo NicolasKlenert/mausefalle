@@ -15,6 +15,7 @@
 #include "lre_led_status.h"
 #include "lre_wait.h"
 #include "lre_gyro.h"
+#include "lre_sensor.h"
 
 #include "lre_usart.h"
 #include "lre_queue.h"
@@ -28,14 +29,24 @@ int main(void){
 	lre_wait_init();
 	//init gyro
 //	lre_gyro_init();
-	//init leds
-	lre_leds_init();
+	//init sensors
+	lre_sensor_init();
+	lre_sensor_start();
 
 	while(1){
 		lre_wait(400);
-		lre_ledToggle(ledAll);
-		send_usart_string("test");
+		char str[75];
+		char distance1[24];
+		char distance2[24];
+		char distance3[24];
+		hreadable_floats(mouse_distance[0],distance1);
+		hreadable_floats(mouse_distance[1],distance2);
+		hreadable_floats(mouse_distance[2],distance3);
+		sprintf(str,"Entfernungen: %s; %s; %s;",distance1,distance2,distance3);
+		send_usart_string(str);
 	}
+
+
 
 //	led_status_init();
 //	mouse_setStatus(MOUSE_CRITICAL_ERROR);

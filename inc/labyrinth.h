@@ -35,18 +35,18 @@
  *
  * The defualt labyrinth is a labyrinth with walls everywhere
  */
-volatile uint16_t cells[numRows*numCols];
+volatile uint8_t cells[numRows*numCols];
 
-uint16_t getPath(uint16_t start, uint16_t aim, uint16_t *arr);
-void setWall(uint16_t id,uint16_t direction);
-void setGate(uint16_t id,uint16_t direction);
-void setWalls(uint16_t id,uint16_t bitflag);
-void setGates(uint16_t id,uint16_t bitflag);
-uint16_t hasWall(uint16_t id,uint16_t direction);
-uint16_t hasGate(uint16_t id,uint16_t direction);
-uint16_t getCellId(uint16_t id,uint16_t direction);
-uint16_t inverseDirection(uint16_t direction);
-uint16_t rotateDirection(uint16_t direction, uint16_t times);
+uint8_t getPath(uint16_t start, uint16_t aim, uint16_t *arr);
+void setWall(uint16_t id,uint8_t direction);
+void setGate(uint16_t id,uint8_t direction);
+void setWalls(uint16_t id,uint8_t bitflag);
+void setGates(uint16_t id,uint8_t bitflag);
+uint8_t hasWall(uint16_t id,uint8_t direction);
+uint8_t hasGate(uint16_t id,uint8_t direction);
+uint16_t getCellId(uint16_t id,uint8_t direction);
+uint8_t inverseDirection(uint8_t direction);
+uint8_t rotateDirection(uint8_t direction, uint8_t times);
 
 
 #endif /* LABYRINTH_H_ */

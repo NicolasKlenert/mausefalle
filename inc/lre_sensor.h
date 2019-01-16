@@ -11,7 +11,7 @@
 uint16_t startTime[3];
 uint16_t endTime[3];
 
-lre_sensor_init();
-lre_sensor_start();
+void lre_sensor_init();
+void lre_sensor_start();
 
 #endif /* LRE_SENSOR_H_ */
