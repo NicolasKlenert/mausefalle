@@ -7,17 +7,25 @@
 
 #include "lre_stepper.h"
 
+// defines
+#define TIMER_FREQ 1000000			// Frequency of the stepper timers TIM16 & TIM17
+#define ACCELERATION (float)30.0			// acceleration in mm/s^2
+#define WHEEL_DIAMETER (float)80.0			// Wheel diameter in mm
+#define STEPS_PER_MM (float)( 4096.0 / (3.14159265359 * WHEEL_DIAMETER) )
+#define ACC_STEPS_PER_SEC (int16_t)( ACCELERATION * STEPS_PER_MM )		// acceleration in steps/s^2
+
 // typedef
 typedef struct{
 	uint16_t step_table[8];
 	uint16_t reset_mask;
 	uint8_t counter;
-	int32_t planned_steps;
 	int32_t current_step;
+	int16_t step_freq;			// steps/s
+	int16_t desired_step_freq;	// steps/s
 }stepper_struct;
 
 // variables
-stepper_struct stepper1 = {{
+stepper_struct stepper_right = {{
 		0b000100,
 		0b001100,
 		0b001000,
@@ -29,8 +37,9 @@ stepper_struct stepper1 = {{
 		0b1111111111000011,
 		0,
 		0,
+		0,
 		0};
-stepper_struct stepper2 = {{
+stepper_struct stepper_left = {{
 		0b0001000000,
 		0b0011000000,
 		0b0010000000,
@@ -42,9 +51,12 @@ stepper_struct stepper2 = {{
 		0b1111110000111111,
 		0,
 		0,
+		0,
 		0};
 
 // function prototypes
+void stepper_nextStep(stepper_struct *stepper);
+void stepper_acceleration_ramp(TIM_TypeDef *tim, stepper_struct *stepper);
 uint8_t increment_counter(uint8_t counter);
 uint8_t decrement_counter(uint8_t counter);
 
@@ -58,7 +70,7 @@ void lre_stepper_init(void)
 	TIM_TimeBaseInitTypeDef timerInitStruct;
 	timerInitStruct.TIM_ClockDivision = 0;
 	timerInitStruct.TIM_CounterMode = TIM_CounterMode_Up;
-	timerInitStruct.TIM_Period = 0xFFFF;	// will be changed by lre_stepperx_setSpeed()
+	timerInitStruct.TIM_Period = 0xFFFF;
 	timerInitStruct.TIM_Prescaler = SystemCoreClock / TIMER_FREQ - 1;
 	timerInitStruct.TIM_RepetitionCounter = 0;
 
@@ -82,9 +94,9 @@ void lre_stepper_init(void)
 	NVIC_Init(&nvicTIM16);
 
 	NVIC_InitTypeDef nvicTIM17;
-	nvicTIM16.NVIC_IRQChannel = TIM17_IRQn;
-	nvicTIM16.NVIC_IRQChannelCmd = ENABLE;
-	nvicTIM16.NVIC_IRQChannelPriority = 1;	// can be 0 to 3
+	nvicTIM17.NVIC_IRQChannel = TIM17_IRQn;
+	nvicTIM17.NVIC_IRQChannelCmd = ENABLE;
+	nvicTIM17.NVIC_IRQChannelPriority = 1;	// can be 0 to 3
 	NVIC_Init(&nvicTIM17);
 
 	// GPIO init
@@ -102,60 +114,47 @@ void lre_stepper_init(void)
 	GPIO_SetBits(GPIOB, GPIO_Pin_2 | GPIO_Pin_6);
 }
 
-/* Stellt die Timer Periode so ein, dass die gewünschte Step-Frequenz erreicht wird
- * ACHTUNG: Hier wird unter Umständen stark gerundet!
+/* Updates the desired step frequency in the stepper struct
  *
- * @Param stepFreq: desired step frequency in Hz
+ * @param speed: desired speed in mm/s (-90 ... 90)
+ * @param stepper_x: STEPPER_RIGHT or STEPPER_LEFT
  *
  * */
-void lre_stepper1_setStepFreq(uint16_t stepFreq)
+void lre_stepper_setSpeed(int8_t speed_mm_s, uint8_t stepper_x)
 {
-	TIM_SetAutoreload(TIM16, TIMER_FREQ / stepFreq - 1);
+	if (stepper_x == STEPPER_RIGHT)
+	{
+		stepper_right.desired_step_freq = (int16_t)( speed_mm_s * STEPS_PER_MM );	// convert the speed to a step frequency
+	}
+	else if (stepper_x == STEPPER_LEFT)
+	{
+		stepper_left.desired_step_freq = (int16_t)( speed_mm_s * STEPS_PER_MM );	// convert the speed to a step frequency
+	}
 }
 
-/* Stellt die Timer Periode so ein, dass die gewünschte Step-Frequenz erreicht wird
- * ACHTUNG: Hier wird unter Umständen stark gerundet!
- * @Param stepFreq: desired step frequency in Hz
- * */
-void lre_stepper2_setStepFreq(uint16_t stepFreq)
+int16_t lre_stepper_getMovedDistance(uint8_t stepper_x)
 {
-	TIM_SetAutoreload(TIM17, TIMER_FREQ / stepFreq - 1);
-}
-
-/* Diese Funktion übergibt dem Schrittmotor eine Anzahl an auszuführenden Schritten
- *
- * ACHTUNG: Wird eine neue Schrittfolge übergeben bevor die alte vollständig ausgeführt wurde,
- * beginnt der Schrittmotor mit der neuen Schrittfolge und verwirft die Alte
- *
- * */
-void lre_stepper1_step(int32_t steps)
-{
-	stepper1.planned_steps = steps;
-	stepper1.current_step = 0;
-}
-
-/* Diese Funktion übergibt dem Schrittmotor eine Anzahl an auszuführenden Schritten
- *
- * ACHTUNG: Wird eine neue Schrittfolge übergeben bevor die alte vollständig ausgeführt wurde,
- * beginnt der Schrittmotor mit der neuen Schrittfolge und verwirft die Alte
- *
- * */
-void lre_stepper2_step(int32_t steps)
-{
-	stepper2.planned_steps = steps;
-	stepper2.current_step = 0;
+	if (stepper_x == STEPPER_RIGHT)
+	{
+		return (uint16_t)stepper_right.current_step / STEPS_PER_MM;
+	}
+	else if (stepper_x == STEPPER_LEFT)
+	{
+		return (uint16_t)stepper_left.current_step / STEPS_PER_MM;
+	}
+	return 0;
 }
 
 void stepper_nextStep(stepper_struct *stepper)
 {
 	uint16_t portValue = 0;
 
-	if (stepper->current_step < stepper->planned_steps)
+	if (stepper->step_freq > 0)
 	{
 		stepper->counter = increment_counter(stepper->counter);
 		stepper->current_step++;
 	}
-	else if (stepper->current_step > stepper->planned_steps)
+	else if (stepper->step_freq < 0)
 	{
 		stepper->counter = decrement_counter(stepper->counter);
 		stepper->current_step--;
@@ -165,21 +164,72 @@ void stepper_nextStep(stepper_struct *stepper)
 		return;
 	}
 	portValue = GPIO_ReadOutputData(GPIOB);	// read old GPIOB Data
-	portValue &= stepper->reset_mask;	// reset stepper 1 Pins
+	portValue &= stepper->reset_mask;	// reset stepper Pins
 	portValue |= stepper->step_table[stepper->counter];	// set new Pins
-	GPIO_Write(GPIOB, portValue);
+	GPIO_Write(GPIOB, portValue);	// write new Pins
+}
+
+void stepper_acceleration_ramp(TIM_TypeDef *tim, stepper_struct *stepper)
+{
+	int16_t max_freq_inc = 0;
+	uint32_t timer_period = 0;
+	uint32_t timer_period_old = tim->ARR;	// read the value of the autoreload register
+
+	// calculate the maximum step frequency change based on the current timer period and the desired acceleration
+	// 1 is added so the step_freq can increase above ACC_STEPS_PER_SEC
+	max_freq_inc = ( ACC_STEPS_PER_SEC * ( timer_period_old + 1 ) ) / TIMER_FREQ + 1;
+	// check if the difference is lower than the maximum step frequency change
+	if (abs(stepper->desired_step_freq - stepper->step_freq) < max_freq_inc)
+	{
+		stepper->step_freq = stepper->desired_step_freq;
+	}
+	else
+	{
+		// acceleration
+		if (stepper->desired_step_freq > stepper->step_freq)
+		{
+			stepper->step_freq += max_freq_inc;
+		}
+		// deceleration
+		else
+		{
+			stepper->step_freq -= max_freq_inc;
+		}
+	}
+	// if step_freq equals 0, set the longest possible timer period
+	if (stepper->step_freq == 0)
+	{
+		timer_period = 0xFFFF;
+	}
+	else
+	{
+		timer_period = TIMER_FREQ / abs( stepper->step_freq ) - 1;
+	}
+	TIM_SetAutoreload(tim, timer_period);		// set the new Timer period
 }
 
 void TIM16_IRQHandler(void)
 {
 	TIM_ClearITPendingBit(TIM16, TIM_IT_Update);
-	stepper_nextStep(&stepper1);
+	// perform next step
+	stepper_nextStep(&stepper_right);
+	// check if the step frequency has to be changed
+	if (stepper_right.step_freq != stepper_right.desired_step_freq)
+	{
+		stepper_acceleration_ramp(TIM16, &stepper_right);		// change the frequency according to acceleration
+	}
 }
 
 void TIM17_IRQHandler(void)
 {
 	TIM_ClearITPendingBit(TIM17, TIM_IT_Update);
-	stepper_nextStep(&stepper2);
+	// perform next step
+	stepper_nextStep(&stepper_left);
+	// check if the step frequency has to be changed
+	if (stepper_left.step_freq != stepper_left.desired_step_freq)
+	{
+		stepper_acceleration_ramp(TIM17, &stepper_left);		// change the frequency according to acceleration
+	}
 }
 
 uint8_t increment_counter(uint8_t counter)

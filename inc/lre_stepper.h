@@ -10,15 +10,15 @@
 
 // includes
 #include "stm32f0xx.h"
+#include <stdlib.h>
 
 // defines
-#define TIMER_FREQ 1000000
+#define STEPPER_RIGHT (uint8_t)0		// belongs to TIM16
+#define STEPPER_LEFT (uint8_t)1			// belongs to TIM17
 
 // function prototypes
 void lre_stepper_init(void);
-void lre_stepper1_setStepFreq(uint16_t stepFreq);
-void lre_stepper2_setStepFreq(uint16_t stepFreq);
-void lre_stepper1_step(int32_t steps);
-void lre_stepper2_step(int32_t steps);
+void lre_stepper_setSpeed(int8_t speed_mm_s, uint8_t stepper_x);
+int16_t lre_stepper_getMovedDistance(uint8_t stepper_x);
 
 #endif /* LRE_STEPPER_H_ */
