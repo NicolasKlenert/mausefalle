@@ -9,6 +9,7 @@
 #include "stm32f072b_discovery.h"
 #include "stdio.h"
 #include "lre_usart.h"
+#include "cmd.h"
 
 void hreadable_floats(float number, char *buf){
 	char tmpSign = (number < 0) ? '-' : '+';
@@ -63,6 +64,25 @@ void usart_init(){
 	usartInitStruct.USART_WordLength = USART_WordLength_8b;
 	USART_Init(USART3, &usartInitStruct);
 	USART_Cmd(USART3, ENABLE);
+	// Enable UART RX not empty interrupt
+	USART_ITConfig(USART3, USART_IT_RXNE, ENABLE);
+	// Enable NVIC for UART3 interrupt
+	NVIC_InitTypeDef nvicUsart3;
+	nvicUsart3.NVIC_IRQChannel = USART3_4_IRQn;
+	nvicUsart3.NVIC_IRQChannelCmd = ENABLE;
+	nvicUsart3.NVIC_IRQChannelPriority = 1;	// can be 0 to 3
+	NVIC_Init(&nvicUsart3);
 }
 
-
+/* Interrupt Handler for USART3
+ *
+ *
+ * */
+void USART3_4_IRQHandler(void)
+{
+	if ( SET == USART_GetITStatus(USART3, USART_IT_RXNE) )
+	{
+		USART_ClearITPendingBit(USART3, USART_IT_RXNE);
+		cmd_handler();
+	}
+}

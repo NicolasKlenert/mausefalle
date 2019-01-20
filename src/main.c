@@ -17,21 +17,34 @@
 #include "lre_gyro.h"
 #include "lre_sensor.h"
 
+#include "lre_stepper.h"
 #include "lre_usart.h"
 #include "lre_queue.h"
 #include "mouse.h"
 #include "main.h"
+#include "cmd.h"
+
+
+void setSpeed(int argc, char **argv)
+{
+	uint32_t speed = cmd_str2Num(argv[1], (uint8_t)10);
+	lre_stepper_setSpeed((uint8_t)speed, STEPPER_LEFT);
+}
 
 int main(void){
 	//init usart
-	usart_init();
+//	usart_init();
 	//init waiter
-	lre_wait_init();
+//	lre_wait_init();
 	//init gyro
 //	lre_gyro_init();
 	//init sensors
-	lre_sensor_init();
-	lre_sensor_start();
+//	lre_sensor_init();
+//	lre_sensor_start();
+	cmd_init();
+	cmd_add("set_speed", &setSpeed);
+	lre_stepper_init();
+//	lre_stepper_setSpeed(100, STEPPER_LEFT);
 
 	while(1){
 		lre_wait(400);
