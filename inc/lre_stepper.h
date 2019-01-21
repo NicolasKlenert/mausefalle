@@ -20,5 +20,6 @@
 void lre_stepper_init(void);
 void lre_stepper_setSpeed(int8_t speed_mm_s, uint8_t stepper_x);
 int16_t lre_stepper_getMovedDistance(uint8_t stepper_x);
+void lre_stepper_stop(void);
 
 #endif /* LRE_STEPPER_H_ */

@@ -25,26 +25,32 @@
 #include "cmd.h"
 
 
-void setSpeed(int argc, char **argv)
+void stepperSetSpeed(int argc, char **argv)
 {
 	uint32_t speed = cmd_str2Num(argv[1], (uint8_t)10);
 	lre_stepper_setSpeed((uint8_t)speed, STEPPER_LEFT);
 }
 
+void stepperStop(int argc, char **argv)
+{
+	lre_stepper_stop();
+}
+
 int main(void){
 	//init usart
-//	usart_init();
+	usart_init();
 	//init waiter
-//	lre_wait_init();
+	lre_wait_init();
 	//init gyro
 //	lre_gyro_init();
 	//init sensors
-//	lre_sensor_init();
-//	lre_sensor_start();
+	lre_sensor_init();
+	lre_sensor_start();
 	cmd_init();
-	cmd_add("set_speed", &setSpeed);
+	cmd_add("stepper_set_speed", &stepperSetSpeed);
+	cmd_add("stepper_stop", &stepperStop);
 	lre_stepper_init();
-//	lre_stepper_setSpeed(100, STEPPER_LEFT);
+//	lre_stepper_setSpeed(20, STEPPER_LEFT);
 
 	while(1){
 		lre_wait(400);

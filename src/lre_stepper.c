@@ -114,6 +114,17 @@ void lre_stepper_init(void)
 	GPIO_SetBits(GPIOB, GPIO_Pin_2 | GPIO_Pin_6);
 }
 
+void lre_stepper_stop(void)
+{
+	stepper_right.desired_step_freq = 0;	// set desired step freq to 0
+	stepper_right.step_freq = 0;			// set step freq to 0
+	TIM_SetAutoreload(TIM16, 0xFFFF);		// set the Timer period to maximum
+
+	stepper_left.desired_step_freq = 0;
+	stepper_left.step_freq = 0;
+	TIM_SetAutoreload(TIM17, 0xFFFF);		// set the Timer period to maximum
+}
+
 /* Updates the desired step frequency in the stepper struct
  *
  * @param speed: desired speed in mm/s (-90 ... 90)
