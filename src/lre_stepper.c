@@ -221,28 +221,41 @@ void stepper_acceleration_ramp(TIM_TypeDef *tim, stepper_struct *stepper)
 
 void TIM16_IRQHandler(void)
 {
-	TIM_ClearITPendingBit(TIM16, TIM_IT_Update);
-	// perform next step
-	stepper_nextStep(&stepper_right);
-	// check if the step frequency has to be changed
-	if (stepper_right.step_freq != stepper_right.desired_step_freq)
+	// check which interrupt event occurred
+	if (SET == TIM_GetITStatus(TIM16, TIM_IT_Update))
 	{
-		stepper_acceleration_ramp(TIM16, &stepper_right);		// change the frequency according to acceleration
+		// reset ITPendingBit
+		TIM_ClearITPendingBit(TIM16, TIM_IT_Update);
+		// perform next step
+		stepper_nextStep(&stepper_right);
+		// check if the step frequency has to be changed
+		if (stepper_right.step_freq != stepper_right.desired_step_freq)
+		{
+			stepper_acceleration_ramp(TIM16, &stepper_right);		// change the frequency according to acceleration
+		}
 	}
 }
 
 void TIM17_IRQHandler(void)
 {
-	TIM_ClearITPendingBit(TIM17, TIM_IT_Update);
-	// perform next step
-	stepper_nextStep(&stepper_left);
-	// check if the step frequency has to be changed
-	if (stepper_left.step_freq != stepper_left.desired_step_freq)
+	// check which interrupt event occurred
+	if (SET == TIM_GetITStatus(TIM17, TIM_IT_Update))
 	{
-		stepper_acceleration_ramp(TIM17, &stepper_left);		// change the frequency according to acceleration
+		// reset ITPendingBit
+		TIM_ClearITPendingBit(TIM17, TIM_IT_Update);
+		// perform next step
+		stepper_nextStep(&stepper_left);
+		// check if the step frequency has to be changed
+		if (stepper_left.step_freq != stepper_left.desired_step_freq)
+		{
+			stepper_acceleration_ramp(TIM17, &stepper_left);		// change the frequency according to acceleration
+		}
 	}
 }
 
+/* This function increments a counter keeping it between 0 and 7
+ *
+ * */
 uint8_t increment_counter(uint8_t counter)
 {
 	if (counter == 7)
@@ -255,6 +268,9 @@ uint8_t increment_counter(uint8_t counter)
 	}
 }
 
+/* This function decrements a counter keeping it between 0 and 7
+ *
+ * */
 uint8_t decrement_counter(uint8_t counter)
 {
 	if (counter == 0)
