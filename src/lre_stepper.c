@@ -25,7 +25,7 @@ typedef struct{
 }stepper_struct;
 
 // variables
-stepper_struct stepper_right = {{
+stepper_struct stepper_left = {{
 		0b000100,
 		0b001100,
 		0b001000,
@@ -39,7 +39,7 @@ stepper_struct stepper_right = {{
 		0,
 		0,
 		0};
-stepper_struct stepper_left = {{
+stepper_struct stepper_right = {{
 		0b0001000000,
 		0b0011000000,
 		0b0010000000,

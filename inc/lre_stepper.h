@@ -5,6 +5,8 @@
  *      Author: JoBire
  */
 
+//TODO invert left stepper direction
+
 #ifndef LRE_STEPPER_H_
 #define LRE_STEPPER_H_
 
