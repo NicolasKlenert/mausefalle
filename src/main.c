@@ -28,7 +28,7 @@
 void stepperSetSpeed(int argc, char **argv)
 {
 	uint32_t speed = cmd_str2Num(argv[1], (uint8_t)10);
-	lre_stepper_setSpeed((uint8_t)speed, STEPPER_LEFT);
+	//lre_stepper_setSpeed((uint8_t)speed, STEPPER_LEFT);
 }
 
 void stepperStop(int argc, char **argv)
