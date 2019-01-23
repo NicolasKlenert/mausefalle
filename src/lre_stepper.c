@@ -139,7 +139,7 @@ void lre_stepper_setSpeed(int8_t speed_mm_s, uint8_t stepper_x)
 	}
 	else if (stepper_x == STEPPER_LEFT)
 	{
-		stepper_left.desired_step_freq = (int16_t)( speed_mm_s * STEPS_PER_MM );	// convert the speed to a step frequency
+		stepper_left.desired_step_freq = (int16_t)( -speed_mm_s * STEPS_PER_MM );	// negativ so steppers turn in same direction
 	}
 }
 
@@ -151,7 +151,7 @@ int16_t lre_stepper_getMovedDistance(uint8_t stepper_x)
 	}
 	else if (stepper_x == STEPPER_LEFT)
 	{
-		return (uint16_t)stepper_left.current_step / STEPS_PER_MM;
+		return (uint16_t)-stepper_left.current_step / STEPS_PER_MM;		// negativ because left stepper ist inverted
 	}
 	return 0;
 }
