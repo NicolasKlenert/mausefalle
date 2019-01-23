@@ -16,6 +16,13 @@
 
 void move(int argc, char **argv)
 {
-
+ return;
 }
-cmd_add("mv", &move);
+
+/* Hier müssen alle cmd_add Befehle rein
+ *
+ * */
+void communication_init()
+{
+	cmd_add("mv", &move);
+}
