@@ -9,6 +9,7 @@
 */
 
 
+#include <lre_communication.h>
 #include "stm32f0xx.h"
 #include "stm32f072b_discovery.h"
 #include "stdio.h"
@@ -22,12 +23,11 @@
 #include "lre_queue.h"
 #include "mouse.h"
 #include "main.h"
-#include "cmd.h"
 
 
 void stepperSetSpeed(int argc, char **argv)
 {
-	uint32_t speed = cmd_str2Num(argv[1], (uint8_t)10);
+	uint32_t speed = cmd_str2Num(argv[2], (uint8_t)10);
 	lre_stepper_setSpeed((uint8_t)speed, STEPPER_LEFT);
 }
 
@@ -38,6 +38,31 @@ void stepperStop(int argc, char **argv)
 
 int main(void){
 	//init usart
+		usart_init();
+	// init stepper
+		lre_stepper_init();
+	//init waiter
+		lre_wait_init();
+	// init communication
+		lre_communication_init();
+
+		cmd_add("stepper_set_speed", &stepperSetSpeed);
+		cmd_add("stepper_stop", &stepperStop);
+
+
+
+		while(1){
+			lre_wait(5000);
+			char str[75] = "connection online";
+			send_usart_string(str);
+
+		}
+
+}
+
+/*   Testprogramm vom 24.01.19 17:19 Uhr
+ *
+ 	//init usart
 	usart_init();
 	//init waiter
 	lre_wait_init();
@@ -65,11 +90,10 @@ int main(void){
 		send_usart_string(str);
 	}
 
-
-
 //	led_status_init();
 //	mouse_setStatus(MOUSE_CRITICAL_ERROR);
 //	led_status_show();
-}
+
+ */
 
 
