@@ -35,6 +35,7 @@ See https://help.github.com/articles/cloning-a-repository/ for the instructions 
 # Timer
 
 * TIM1 for the sensors
+* TIM2 for execution time measurement
 * TIM3 for the LEDs
 * TIM16 and TIM17 for the wheels
 
