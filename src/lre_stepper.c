@@ -6,6 +6,7 @@
  */
 
 #include "lre_stepper.h"
+#include "lre_execution_time.h"
 
 // defines
 #define TIMER_FREQ 1000000			// Frequency of the stepper timers TIM16 & TIM17
@@ -219,6 +220,9 @@ void stepper_acceleration_ramp(TIM_TypeDef *tim, stepper_struct *stepper)
 	TIM_SetAutoreload(tim, timer_period);		// set the new Timer period
 }
 
+/* Execution time: 5탎 ... 15탎
+ *
+ * */
 void TIM16_IRQHandler(void)
 {
 	// check which interrupt event occurred
@@ -236,6 +240,9 @@ void TIM16_IRQHandler(void)
 	}
 }
 
+/* Execution time: 5탎 ... 15탎
+ *
+ * */
 void TIM17_IRQHandler(void)
 {
 	// check which interrupt event occurred
