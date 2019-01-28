@@ -11,6 +11,6 @@
 #define FALSE		0
 #define TRUE		1
 
-#define waitTime       1000	//[ms]
+//#define waitTime       1000	//[ms]
 
 #endif /* MAIN_H_ */
