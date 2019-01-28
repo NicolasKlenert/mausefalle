@@ -47,6 +47,7 @@ uint8_t isVisited(uint16_t id);
 uint16_t getCellId(uint16_t id,uint8_t direction);
 uint8_t inverseDirection(uint8_t direction);
 uint8_t rotateDirection(uint8_t direction, uint8_t times);
+void createFakeLabyrinth();
 
 
 #endif /* LABYRINTH_H_ */

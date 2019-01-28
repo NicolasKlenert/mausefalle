@@ -161,12 +161,14 @@ void stepper_nextStep(stepper_struct *stepper)
 
 	if (stepper->step_freq > 0)
 	{
-		stepper->counter = ++stepper->counter%7;
+		stepper->counter++;
+		stepper->counter = stepper->counter%7;
 		stepper->current_step++;
 	}
 	else if (stepper->step_freq < 0)
 	{
-		stepper->counter = --stepper->counter%7;
+		stepper->counter--;
+		stepper->counter = stepper->counter%7;
 		stepper->current_step--;
 	}
 	else

@@ -19,8 +19,10 @@
 #include <stdlib.h>
 #include <limits.h>
 
+#ifndef TRUE
 #define TRUE		1
 #define FALSE		0
+#endif
 
 struct Queue{
 	uint16_t front, rear, size;
