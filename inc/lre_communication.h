@@ -13,8 +13,10 @@
 #include "lre_stepper.h"
 #include "lre_leds.h"
 #include "lre_queue.h"
+#include "lre_usart.h"
 #include "mouse.h"
 #include "main.h"
+
 
 
 // defines

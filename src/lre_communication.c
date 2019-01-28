@@ -33,7 +33,6 @@ void lre_telemetrie(int argc, char **argv)
 {	// Telemetrie Ultra-sonic sensors
 	if ((argv[1][0]== 0x75) && (argv[1][1]== 0x73)) // first letter u, second letter s in hex
 	{
-		lre_wait(400);
 		char str[75];
 		char distance1[24];
 		char distance2[24];
@@ -65,43 +64,25 @@ void lre_move(int argc, char **argv)
 	if ((argv[1][0]== 0x73) && (argv[1][1]== 0x70)) // first letter s, second letter p in hex
 	{
 		uint32_t speed = cmd_str2Num(argv[2], (uint8_t)10);
-		lre_stepper_setSpeed((uint8_t)speed, STEPPER_LEFT);
-		lre_stepper_setSpeed((uint8_t)speed, STEPPER_RIGHT);
+		lre_stepper_setSpeed((uint8_t)speed, STEPPER_BOTH, 0);
 	}
 	// move stop
 	if ((argv[1][0]== 0x73) && (argv[1][1]== 0x74)) // first letter s, second letter t in hex
 	{
-		lre_stepper_stop();
+		lre_stepper_stop(STEPPER_BOTH);
 	}
 
-	// move distance --> quick and dirty
+	// move distance
 	if ((argv[1][0]== 0x64) && (argv[1][1]== 0x73)) // first letter d, second letter s in hex
-	{   lre_ledOn(ledDown);
-		//uint32_t distance_desired = cmd_str2Num(argv[2], (uint8_t)10);
-		int16_t distance_desired = 1000;
-		int16_t moved_distance=0;
-		lre_stepper_setSpeed(SPEED, STEPPER_LEFT);
-		lre_stepper_setSpeed(SPEED, STEPPER_RIGHT);
-		while(moved_distance  < distance_desired)
-			{//lre_ledToggle(ledLeft);
-
-
-			//moved_distance = lre_stepper_getMovedDistance(STEPPER_RIGHT);
-			//lre_wait(500);				/ breaks the code
-			//moved_distance=2000;
-			moved_distance++;
-			}
-		lre_ledOn(ledLeft);
-
-		//lre_stepper_stop();
+	{
+		int32_t distance_desired = cmd_str2Num(argv[2], (uint8_t)10);
+		lre_stepper_setSpeed(SPEED, STEPPER_BOTH, distance_desired);
 	}
 	// move rotate
 		if ((argv[1][0]== 0x73) && (argv[1][1]== 0x74)) // first letter s, second letter t in hex
 		{
-				lre_stepper_stop();
+				lre_stepper_stop(STEPPER_BOTH);
 		}
-
-
 }
 
 void lre_maze_com(int argc, char **argv)

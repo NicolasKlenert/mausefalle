@@ -23,6 +23,7 @@ typedef struct{
 	int32_t current_step;
 	int16_t step_freq;			// steps/s
 	int16_t desired_step_freq;	// steps/s
+	int16_t max_distance;
 }stepper_struct;
 
 // variables
@@ -39,6 +40,7 @@ stepper_struct stepper_left = {{
 		0,
 		0,
 		0,
+		0,
 		0};
 stepper_struct stepper_right = {{
 		0b0001000000,
@@ -50,6 +52,7 @@ stepper_struct stepper_right = {{
 		0b1000000000,
 		0b1001000000 },
 		0b1111110000111111,
+		0,
 		0,
 		0,
 		0,
@@ -113,44 +116,52 @@ void lre_stepper_init(void)
 	GPIO_SetBits(GPIOB, GPIO_Pin_2 | GPIO_Pin_6);
 }
 
-void lre_stepper_stop(void)
+void lre_stepper_stop(uint8_t stepper_x)
 {
-	stepper_right.desired_step_freq = 0;	// set desired step freq to 0
-	stepper_right.step_freq = 0;			// set step freq to 0
-	TIM_SetAutoreload(TIM16, 0xFFFF);		// set the Timer period to maximum
-
-	stepper_left.desired_step_freq = 0;
-	stepper_left.step_freq = 0;
-	TIM_SetAutoreload(TIM17, 0xFFFF);		// set the Timer period to maximum
+	if(stepper_x & STEPPER_RIGHT){
+		stepper_right.desired_step_freq = 0;	// set desired step freq to 0
+		stepper_right.step_freq = 0;			// set step freq to 0
+		stepper_right.current_step = 0;
+		TIM_SetAutoreload(TIM16, 0xFFFF);		// set the Timer period to maximum
+	}
+	if(stepper_x & STEPPER_LEFT){
+		stepper_left.desired_step_freq = 0;
+		stepper_left.step_freq = 0;
+		stepper_left.current_step = 0;
+		TIM_SetAutoreload(TIM17, 0xFFFF);		// set the Timer period to maximum
+	}
 }
 
 /* Updates the desired step frequency in the stepper struct
  *
  * @param speed: desired speed in mm/s (-90 ... 90)
- * @param stepper_x: STEPPER_RIGHT or STEPPER_LEFT
+ * @param stepper_x: STEPPER_RIGHT or STEPPER_LEFT or STEPPER_BOTH
+ * @param max_distance: the maximal distance traveling is allowed in [mm]. If 0 is given, then is it seen aas infinity
  *
  * */
-void lre_stepper_setSpeed(int8_t speed_mm_s, uint8_t stepper_x)
+void lre_stepper_setSpeed(int8_t speed_mm_s, uint8_t stepper_x, int16_t max_distance)
 {
-	if (stepper_x == STEPPER_RIGHT)
+	if (stepper_x & STEPPER_RIGHT)
 	{
 		stepper_right.desired_step_freq = (int16_t)( speed_mm_s * STEPS_PER_MM );	// convert the speed to a step frequency
+		stepper_right.max_distance = max_distance;
 	}
-	else if (stepper_x == STEPPER_LEFT)
+	if (stepper_x & STEPPER_LEFT)
 	{
 		stepper_left.desired_step_freq = (int16_t)( -speed_mm_s * STEPS_PER_MM );	// negativ so steppers turn in same direction
+		stepper_left.max_distance = max_distance;
 	}
 }
 
 int16_t lre_stepper_getMovedDistance(uint8_t stepper_x)
 {
-	if (stepper_x == STEPPER_RIGHT)
+	if (stepper_x & STEPPER_RIGHT)
 	{
-		return (uint16_t)stepper_right.current_step / STEPS_PER_MM;
+		return stepper_right.current_step / STEPS_PER_MM;
 	}
-	else if (stepper_x == STEPPER_LEFT)
+	else if (stepper_x & STEPPER_LEFT)
 	{
-		return (uint16_t)-stepper_left.current_step / STEPS_PER_MM;		// negativ because left stepper ist inverted
+		return -stepper_left.current_step / STEPS_PER_MM;		// negativ because left stepper is inverted
 	}
 	return 0;
 }
@@ -230,12 +241,17 @@ void TIM16_IRQHandler(void)
 	{
 		// reset ITPendingBit
 		TIM_ClearITPendingBit(TIM16, TIM_IT_Update);
-		// perform next step
-		stepper_nextStep(&stepper_right);
-		// check if the step frequency has to be changed
-		if (stepper_right.step_freq != stepper_right.desired_step_freq)
-		{
-			stepper_acceleration_ramp(TIM16, &stepper_right);		// change the frequency according to acceleration
+		if(abs(lre_stepper_getMovedDistance(STEPPER_RIGHT)) >= abs(stepper_right.max_distance) && stepper_right.max_distance != 0){
+			// already traveled max_distance
+			lre_stepper_stop(STEPPER_RIGHT);
+		}else{
+			// perform next step
+			stepper_nextStep(&stepper_right);
+			// check if the step frequency has to be changed
+			if (stepper_right.step_freq != stepper_right.desired_step_freq)
+				{
+				stepper_acceleration_ramp(TIM16, &stepper_right);		// change the frequency according to acceleration
+			}
 		}
 	}
 }
@@ -250,12 +266,17 @@ void TIM17_IRQHandler(void)
 	{
 		// reset ITPendingBit
 		TIM_ClearITPendingBit(TIM17, TIM_IT_Update);
-		// perform next step
-		stepper_nextStep(&stepper_left);
-		// check if the step frequency has to be changed
-		if (stepper_left.step_freq != stepper_left.desired_step_freq)
-		{
-			stepper_acceleration_ramp(TIM17, &stepper_left);		// change the frequency according to acceleration
+		if(abs(lre_stepper_getMovedDistance(STEPPER_LEFT)) >= abs(stepper_left.max_distance) && stepper_left.max_distance != 0){
+			// already traveled max_distance
+			lre_stepper_stop(STEPPER_LEFT);
+		}else{
+			// perform next step
+			stepper_nextStep(&stepper_left);
+			// check if the step frequency has to be changed
+			if (stepper_left.step_freq != stepper_left.desired_step_freq)
+			{
+				stepper_acceleration_ramp(TIM17, &stepper_left);		// change the frequency according to acceleration
+			}
 		}
 	}
 }
