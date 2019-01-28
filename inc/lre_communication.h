@@ -11,6 +11,10 @@
 // includes
 #include "cmd.h"
 #include "lre_stepper.h"
+#include "lre_leds.h"
+#include "lre_queue.h"
+#include "mouse.h"
+#include "main.h"
 
 
 // defines
@@ -20,6 +24,8 @@
 
 void lre_communication_init();
 void lre_move(int argc, char **argv);
+void lre_telemetrie(int argc, char **argv);
+void lre_maze_com(int argc, char **argv);
 
 
 #endif /* LRE_COMMUNICATION_H_ */
