@@ -58,8 +58,6 @@ stepper_struct stepper_right = {{
 // function prototypes
 void stepper_nextStep(stepper_struct *stepper);
 void stepper_acceleration_ramp(TIM_TypeDef *tim, stepper_struct *stepper);
-uint8_t increment_counter(uint8_t counter);
-uint8_t decrement_counter(uint8_t counter);
 
 void lre_stepper_init(void)
 {
@@ -163,12 +161,12 @@ void stepper_nextStep(stepper_struct *stepper)
 
 	if (stepper->step_freq > 0)
 	{
-		stepper->counter = increment_counter(stepper->counter);
+		stepper->counter = ++stepper->counter%7;
 		stepper->current_step++;
 	}
 	else if (stepper->step_freq < 0)
 	{
-		stepper->counter = decrement_counter(stepper->counter);
+		stepper->counter = --stepper->counter%7;
 		stepper->current_step--;
 	}
 	else
@@ -257,35 +255,5 @@ void TIM17_IRQHandler(void)
 		{
 			stepper_acceleration_ramp(TIM17, &stepper_left);		// change the frequency according to acceleration
 		}
-	}
-}
-
-/* This function increments a counter keeping it between 0 and 7
- *
- * */
-uint8_t increment_counter(uint8_t counter)
-{
-	if (counter == 7)
-	{
-		return 0;
-	}
-	else
-	{
-		return ++counter;
-	}
-}
-
-/* This function decrements a counter keeping it between 0 and 7
- *
- * */
-uint8_t decrement_counter(uint8_t counter)
-{
-	if (counter == 0)
-	{
-		return 7;
-	}
-	else
-	{
-		return --counter;
 	}
 }

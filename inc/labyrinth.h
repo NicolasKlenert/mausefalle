@@ -21,22 +21,20 @@
 #define DIR_SOUTH		2
 #define DIR_WEST		3
 
-/**
- * cells are 4bit-bitflags.
- * The first bit indicates if the upper path is open (1) or not (0).
- * The second one is for the right side, after that the bottom and left side.
- * Example: 0b1001 stands for a cell which has walls on the east and south.
- *
- * The array is the listing of the cells. We start to count at the upper left corner and count towards the left
- * example: a 3x3 maze has an array with ids:
- * 0,1,2
- * 3,4,5
- * 6,7,8
- *
- * The defualt labyrinth is a labyrinth with walls everywhere
- */
-volatile uint8_t cells[numRows*numCols];
+#define leftWallChar '|'
+#define upperWallChar '_'
+#define bottomWallChar '_'
+#define rightWallChar '|'
+#define upperLeftCornerChar ' '
+#define upperRightCornerChar ' '
+#define bottomLeftCornerChar '|'
+#define bottomRightCornerChar '|'
+#define heightRoom 2
+#define widthRoom 3
 
+//arr has to be ((numCols*widthRoom)+2)*(numRows*heightRoom) big
+void printLabyrinth(char *arr);
+void labyrinth_init();
 uint8_t getPath(uint16_t start, uint16_t aim, uint16_t *arr);
 void setWall(uint16_t id,uint8_t direction);
 void setGate(uint16_t id,uint8_t direction);
@@ -44,6 +42,8 @@ void setWalls(uint16_t id,uint8_t bitflag);
 void setGates(uint16_t id,uint8_t bitflag);
 uint8_t hasWall(uint16_t id,uint8_t direction);
 uint8_t hasGate(uint16_t id,uint8_t direction);
+void setVisited(uint16_t id);
+uint8_t isVisited(uint16_t id);
 uint16_t getCellId(uint16_t id,uint8_t direction);
 uint8_t inverseDirection(uint8_t direction);
 uint8_t rotateDirection(uint8_t direction, uint8_t times);

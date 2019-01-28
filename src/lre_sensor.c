@@ -96,7 +96,7 @@ void EXTI4_15_IRQHandler(void){
 		}else{
 			//fallende Flanke
 			endTime[0] = TIM_GetCounter(TIM1);
-			mouse_distance[0] = (endTime[0] - startTime[0])/0.017; //[cm]
+			mouse_distance[0] = (endTime[0] - startTime[0])*0.017; //[cm]
 		}
 		EXTI_ClearITPendingBit(EXTI_Line4);
 	}else if(EXTI_GetITStatus(EXTI_Line5) == SET){
@@ -108,7 +108,7 @@ void EXTI4_15_IRQHandler(void){
 		}else{
 			//fallende Flanke
 			endTime[1] = TIM_GetCounter(TIM1);
-			mouse_distance[1] = (endTime[1] - startTime[1])/0.017; //[cm]
+			mouse_distance[1] = (endTime[1] - startTime[1])*0.017; //[cm]
 		}
 		EXTI_ClearITPendingBit(EXTI_Line5);
 	}else{
@@ -120,7 +120,7 @@ void EXTI4_15_IRQHandler(void){
 		}else{
 			//fallende Flanke
 			endTime[2] = TIM_GetCounter(TIM1);
-			mouse_distance[2] = (endTime[2] - startTime[2])/0.017; //[cm]
+			mouse_distance[2] = (endTime[2] - startTime[2])*0.017; //[cm]
 		}
 		EXTI_ClearITPendingBit(EXTI_Line15);
 	}
