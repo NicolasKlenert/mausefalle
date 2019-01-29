@@ -19,7 +19,7 @@
 typedef struct{
 	uint16_t step_table[8];
 	uint16_t reset_mask;
-	uint8_t counter;
+	int8_t counter;
 	int32_t current_step;
 	int16_t step_freq;			// steps/s
 	int16_t desired_step_freq;	// steps/s
@@ -173,13 +173,13 @@ void stepper_nextStep(stepper_struct *stepper)
 	if (stepper->step_freq > 0)
 	{
 		stepper->counter++;
-		stepper->counter = stepper->counter%7;
+		stepper->counter = stepper->counter%8;
 		stepper->current_step++;
 	}
 	else if (stepper->step_freq < 0)
 	{
 		stepper->counter--;
-		stepper->counter = stepper->counter%7;
+		stepper->counter = stepper->counter%8;
 		stepper->current_step--;
 	}
 	else
