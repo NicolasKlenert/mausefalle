@@ -19,7 +19,7 @@
 typedef struct{
 	uint16_t step_table[8];
 	uint16_t reset_mask;
-	uint8_t counter;
+	int8_t counter;
 	int32_t current_step;
 	int16_t step_freq;			// steps/s
 	int16_t desired_step_freq;	// steps/s
@@ -159,33 +159,44 @@ int16_t lre_stepper_getMovedDistance(uint8_t stepper_x)
 	{
 		return stepper_right.current_step / STEPS_PER_MM;
 	}
-	else if (stepper_x & STEPPER_LEFT)
+	if (stepper_x & STEPPER_LEFT)
 	{
 		return -stepper_left.current_step / STEPS_PER_MM;		// negativ because left stepper is inverted
 	}
+	send_usart_string("get_moved_distance kann den stepper nicht zuordnen");
 	return 0;
+}
+
+int8_t decrement_modulo(int8_t number, int8_t modulo){
+	if(number == 0){
+		return modulo -1;
+	}
+	return --number;
 }
 
 void stepper_nextStep(stepper_struct *stepper)
 {
 	uint16_t portValue = 0;
 
+	//TODO: beide steps sollten gleich schnell verlaufen
 	if (stepper->step_freq > 0)
 	{
 		stepper->counter++;
-		stepper->counter = stepper->counter%7;
+		stepper->counter = stepper->counter%8;
 		stepper->current_step++;
 	}
 	else if (stepper->step_freq < 0)
 	{
-		stepper->counter--;
-		stepper->counter = stepper->counter%7;
+		stepper->counter = decrement_modulo(stepper->counter, 8);
 		stepper->current_step--;
 	}
 	else
 	{
 		return;
 	}
+//	char string[50];
+//	sprintf(string, "%d",stepper->counter);
+//	send_usart_string(string);
 	portValue = GPIO_ReadOutputData(GPIOB);	// read old GPIOB Data
 	portValue &= stepper->reset_mask;	// reset stepper Pins
 	portValue |= stepper->step_table[stepper->counter];	// set new Pins
@@ -266,10 +277,13 @@ void TIM17_IRQHandler(void)
 	{
 		// reset ITPendingBit
 		TIM_ClearITPendingBit(TIM17, TIM_IT_Update);
-		if(abs(lre_stepper_getMovedDistance(STEPPER_LEFT)) >= abs(stepper_right.max_distance) && stepper_right.max_distance != 0){
+		if(abs(lre_stepper_getMovedDistance(STEPPER_LEFT)) >= abs(stepper_left.max_distance) && stepper_left.max_distance != 0){
 			// already traveled max_distance
 			lre_stepper_stop(STEPPER_LEFT);
 		}else{
+//			char string[50];
+//			sprintf(string, "%d",lre_stepper_getMovedDistance(STEPPER_LEFT));
+//			send_usart_string(string);
 			// perform next step
 			stepper_nextStep(&stepper_left);
 			// check if the step frequency has to be changed

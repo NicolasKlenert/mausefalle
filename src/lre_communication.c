@@ -76,7 +76,12 @@ void lre_move(int argc, char **argv)
 	if ((argv[1][0]== 0x64) && (argv[1][1]== 0x73)) // first letter d, second letter s in hex
 	{
 		int32_t distance_desired = cmd_str2Num(argv[2], (uint8_t)10);
-		lre_stepper_setSpeed(SPEED, STEPPER_BOTH, distance_desired);
+		if(distance_desired > 0){
+			lre_stepper_setSpeed(SPEED, STEPPER_BOTH, distance_desired);
+		}
+		else{
+			lre_stepper_setSpeed(-SPEED, STEPPER_BOTH, distance_desired);
+		}
 	}
 	// move rotate
 		if ((argv[1][0]== 0x73) && (argv[1][1]== 0x74)) // first letter s, second letter t in hex
