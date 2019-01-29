@@ -25,16 +25,16 @@
 #include "main.h"
 
 
-void stepperSetSpeed(int argc, char **argv)
-{
-	uint32_t speed = cmd_str2Num(argv[2], (uint8_t)10);
-	lre_stepper_setSpeed((uint8_t)speed, STEPPER_LEFT);
-}
+//void stepperSetSpeed(int argc, char **argv)
+//{
+//	uint32_t speed = cmd_str2Num(argv[2], (uint8_t)10);
+//	lre_stepper_setSpeed((uint8_t)speed, STEPPER_LEFT);
+//}
 
-void stepperStop(int argc, char **argv)
-{
-	lre_stepper_stop();
-}
+//void stepperStop(int argc, char **argv)
+//{
+//	lre_stepper_stop();
+//}
 
 int main(void){
 	//init usart
@@ -45,10 +45,13 @@ int main(void){
 		lre_wait_init();
 	// init communication
 		lre_communication_init();
+	//init sensors
+		lre_sensor_init();
 
-		cmd_add("stepper_set_speed", &stepperSetSpeed);
-		cmd_add("stepper_stop", &stepperStop);
-
+	//	cmd_add("stepper_set_speed", &stepperSetSpeed);
+	//	cmd_add("stepper_stop", &stepperStop);
+	// start stuff
+		lre_sensor_start();
 
 
 		while(1){
