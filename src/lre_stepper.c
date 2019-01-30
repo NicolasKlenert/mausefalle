@@ -7,6 +7,7 @@
 
 #include "lre_stepper.h"
 #include "lre_execution_time.h"
+#include "lre_usart.h"
 
 // defines
 #define TIMER_FREQ 1000000			// Frequency of the stepper timers TIM16 & TIM17
@@ -112,6 +113,7 @@ void lre_stepper_init(void)
 	gpio_initStruct.GPIO_Speed = GPIO_Speed_2MHz;
 	GPIO_Init(GPIOB, &gpio_initStruct);
 
+	// TODO defined position
 	// Set stepper1 and stepper2 to start position
 	GPIO_SetBits(GPIOB, GPIO_Pin_2 | GPIO_Pin_6);
 }

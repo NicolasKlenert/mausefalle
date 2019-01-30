@@ -63,8 +63,8 @@ void lre_move(int argc, char **argv)
 	// move speed
 	if ((argv[1][0]== 0x73) && (argv[1][1]== 0x70)) // first letter s, second letter p in hex
 	{
-		uint32_t speed = cmd_str2Num(argv[2], (uint8_t)10);
-		lre_stepper_setSpeed((uint8_t)speed, STEPPER_BOTH, 0);
+		int8_t speed = cmd_str2Num(argv[2], (uint8_t)10);
+		lre_stepper_setSpeed(speed, STEPPER_BOTH, 0);
 	}
 	// move stop
 	if ((argv[1][0]== 0x73) && (argv[1][1]== 0x74)) // first letter s, second letter t in hex

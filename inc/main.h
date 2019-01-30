@@ -12,5 +12,6 @@
 #define TRUE		1
 
 //#define waitTime       1000	//[ms]
+void error(char* string);
 
 #endif /* MAIN_H_ */

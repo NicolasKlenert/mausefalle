@@ -223,7 +223,7 @@ Convert a string to a number. The base must be specified, ie: "32" is a
 different value in base 10 (decimal) and base 16 (hexadecimal).
 */
 /**************************************************************************/
-uint32_t cmd_str2Num(char *str, uint8_t base)
+int32_t cmd_str2Num(char *str, uint8_t base)
 {
   return strtol(str, NULL, base);
 }

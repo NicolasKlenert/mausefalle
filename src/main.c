@@ -15,9 +15,9 @@
 #include "stdio.h"
 #include "lre_led_status.h"
 #include "lre_wait.h"
-#include "lre_gyro.h"
+//#include "lre_gyro.h"
 #include "lre_sensor.h"
-
+#include "lre_l3gd20.h"
 #include "lre_stepper.h"
 #include "lre_usart.h"
 #include "lre_queue.h"
@@ -36,6 +36,12 @@
 //	lre_stepper_stop();
 //}
 
+void error(char* string){
+	mouse_setStatus(MOUSE_CRITICAL_ERROR);
+	led_status_show();
+	send_usart_string(string);
+}
+
 int main(void){
 	//init usart
 		usart_init();
@@ -47,6 +53,14 @@ int main(void){
 		lre_communication_init();
 	//init sensors
 		lre_sensor_init();
+//		lre_gyro_init();
+		led_status_init();
+
+		lre_l3gd20_init();
+		lre_l3gd20_InterruptCmd(ENABLE);
+		lre_wait(2000);
+		lre_l3gd20_calibrate();
+		lre_wait(2000);
 
 	//	cmd_add("stepper_set_speed", &stepperSetSpeed);
 	//	cmd_add("stepper_stop", &stepperStop);
