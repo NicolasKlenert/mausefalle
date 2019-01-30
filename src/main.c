@@ -43,12 +43,12 @@ void error(char* string){
 }
 
 int main(void){
+	//init waiter
+	lre_wait_init();
 	//init usart
 		usart_init();
 	// init stepper
 		lre_stepper_init();
-	//init waiter
-		lre_wait_init();
 	// init communication
 		lre_communication_init();
 	//init sensors
@@ -56,11 +56,11 @@ int main(void){
 //		lre_gyro_init();
 		led_status_init();
 
-		lre_l3gd20_init();
-		lre_l3gd20_InterruptCmd(ENABLE);
-		lre_wait(2000);
-		lre_l3gd20_calibrate();
-		lre_wait(2000);
+//		lre_l3gd20_init();
+//		lre_l3gd20_InterruptCmd(ENABLE);
+//		lre_wait(2000);
+//		lre_l3gd20_calibrate();
+//		lre_wait(2000);
 
 	//	cmd_add("stepper_set_speed", &stepperSetSpeed);
 	//	cmd_add("stepper_stop", &stepperStop);

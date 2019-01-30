@@ -8,6 +8,7 @@
 #include "lre_stepper.h"
 #include "lre_execution_time.h"
 #include "lre_usart.h"
+#include "lre_wait.h"
 
 // defines
 #define TIMER_FREQ 1000000			// Frequency of the stepper timers TIM16 & TIM17
@@ -65,6 +66,8 @@ void stepper_acceleration_ramp(TIM_TypeDef *tim, stepper_struct *stepper);
 
 void lre_stepper_init(void)
 {
+	uint16_t portValue;
+
 	// RCC enable
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM16, ENABLE);
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM17, ENABLE);
@@ -113,9 +116,21 @@ void lre_stepper_init(void)
 	gpio_initStruct.GPIO_Speed = GPIO_Speed_2MHz;
 	GPIO_Init(GPIOB, &gpio_initStruct);
 
-	// TODO defined position
-	// Set stepper1 and stepper2 to start position
-	GPIO_SetBits(GPIOB, GPIO_Pin_2 | GPIO_Pin_6);
+	/* Set stepper1 and stepper2 to start position (step zero)
+	 * do this by starting with step 8 and decrement down
+	 * to zero for both steppers */
+
+	portValue = GPIO_ReadOutputData(GPIOB);	// read old GPIOB Data
+
+	for (int8_t i = 7; i >= 0; i--)
+	{
+		portValue &= stepper_right.reset_mask;	// reset stepper right Pins
+		portValue &= stepper_left.reset_mask;	// reset stepper left Pins
+		portValue |= stepper_right.step_table[i];	// set new Pins right
+		portValue |= stepper_left.step_table[i];	// set new Pins left
+		GPIO_Write(GPIOB, portValue);	// write new Pins
+		lre_wait(100);
+	}
 }
 
 void lre_stepper_stop(uint8_t stepper_x)
