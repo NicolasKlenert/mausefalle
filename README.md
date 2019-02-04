@@ -43,7 +43,13 @@ See https://help.github.com/articles/cloning-a-repository/ for the instructions 
 # Interrupt's
 
 * Ultrasonic Sensors (EXTI4_15_Line) 
-* Stepper (TIM16
+	Priority: 
+* Stepper's (TIM16_IRQn TIM17_IRQn)
+	Priority: 1
+* Communication (USART3_4_IRQn)
+	Priority: 
+* Control loop (TIM7_IRQn)
+	Priority: 3
 
 # Programming Standards
 
