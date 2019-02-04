@@ -8,20 +8,6 @@
 #ifndef LRE_COMMUNICATION_H_
 #define LRE_COMMUNICATION_H_
 
-// includes
-#include "cmd.h"
-#include "lre_stepper.h"
-#include "lre_leds.h"
-#include "lre_queue.h"
-#include "lre_usart.h"
-#include "mouse.h"
-#include "main.h"
-
-
-
-// defines
-#define SPEED 60
-
 // funcitons prototypes
 
 void lre_communication_init();

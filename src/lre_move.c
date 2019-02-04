@@ -7,10 +7,60 @@
 
 #include "lre_move.h"
 
+// -------------------- Abstracted Stuff (Move Stuff) -------------------------
+
+#include "math.h"
+#include "lre_stepper.h"
+
+#define LRE_MOVE_DISTANCE_BETWEEN_WHEELS_MM	100	//distance between the middle of the wheels in mm
+#define LRE_MOVE_DEFAULT_SPEED 60
+
+//positive degree is a rotation to the left!
+void lre_move_rotate(int8_t degree){
+	moveMode = MOVE_ACTIVE;
+	int8_t distanceToTravel = degree * LRE_MOVE_DISTANCE_BETWEEN_WHEELS_MM * M_PI / 180.0;
+	int8_t speed = LRE_MOVE_DEFAULT_SPEED;
+	if(distanceToTravel < 0){
+		speed *= -1;
+	}
+	lre_stepper_setSpeed(speed,STEPPER_RIGHT,distanceToTravel);
+	lre_stepper_setSpeed(-speed,STEPPER_LEFT,-distanceToTravel);
+	while(!lre_stepper_idle(STEPPER_BOTH)){
+		//wait till stepper is finished
+	}
+	moveMode = MOVE_IDLE;
+}
+
+void lre_move_distance(int16_t distance){
+	moveMode = MOVE_ACTIVE;
+	if(distance > 0){
+		lre_stepper_setSpeed(LRE_MOVE_DEFAULT_SPEED, STEPPER_BOTH, distance);
+	}else{
+		lre_stepper_setSpeed(-LRE_MOVE_DEFAULT_SPEED, STEPPER_BOTH, distance);
+	}
+	while(!lre_stepper_idle(STEPPER_BOTH)){
+			//wait till stepper is finished
+	}
+	moveMode = MOVE_IDLE;
+}
+
+void lre_move_speed(int8_t speed){
+	moveMode = MOVE_ACTIVE;
+	lre_stepper_setSpeed(speed, STEPPER_BOTH, 0);
+}
+
+void lre_move_stop(){
+	lre_stepper_stop(STEPPER_BOTH);
+	moveMode = MOVE_IDLE;
+}
+
+
+// -------------------- CONTROLLER STUFF ---------------------
+
+
 #define LRE_MOVE_CONTROLLER_FREQ 100	// Frequency of Controller in Hz
 #define LRE_MOVE_TIMER_FREQ 10000 		// Frequency of TIM7 in Hz (minimum 734 Hz!!!)
 #define LRE_MOVE_TIMER_PERIOD (uint16_t)(( LRE_MOVE_TIMER_FREQ / LRE_MOVE_CONTROLLER_FREQ ) - 1 )	// Period of TIM7
-
 
 // Reglerstruct
 typedef struct{
@@ -76,8 +126,9 @@ void lre_controller_stop()
  *
  */
 
-void move_straight(int16_t speed, int16_t desired_distance, int16_t wall_distance)
+void lre_move_straight(int16_t speed, int16_t desired_distance, int16_t wall_distance)
 {
+	//TODO: think about starting the controller here
 	controller.controller_speed = speed;
 	controller.controller_desired_distance = desired_distance;
 	controller.wall_distance = wall_distance;

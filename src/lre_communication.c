@@ -6,6 +6,15 @@
  */
 
 #include <lre_communication.h>
+// includes
+#include "cmd.h"
+#include "lre_stepper.h"
+#include "lre_leds.h"
+#include "lre_queue.h"
+#include "lre_usart.h"
+#include "lre_move.h"
+#include "mouse.h"
+#include "main.h"
 /* argv[0] == "name"
  * argv[1] == "first argument"
  * ...
@@ -64,30 +73,26 @@ void lre_move(int argc, char **argv)
 	if ((argv[1][0]== 0x73) && (argv[1][1]== 0x70)) // first letter s, second letter p in hex
 	{
 		int8_t speed = cmd_str2Num(argv[2], (uint8_t)10);
-		lre_stepper_setSpeed(speed, STEPPER_BOTH, 0);
+		lre_move_speed(speed);
 	}
 	// move stop
 	if ((argv[1][0]== 0x73) && (argv[1][1]== 0x74)) // first letter s, second letter t in hex
 	{
-		lre_stepper_stop(STEPPER_BOTH);
+		lre_move_stop();
 	}
 
 	// move distance
 	if ((argv[1][0]== 0x64) && (argv[1][1]== 0x73)) // first letter d, second letter s in hex
 	{
 		int32_t distance_desired = cmd_str2Num(argv[2], (uint8_t)10);
-		if(distance_desired > 0){
-			lre_stepper_setSpeed(SPEED, STEPPER_BOTH, distance_desired);
-		}
-		else{
-			lre_stepper_setSpeed(-SPEED, STEPPER_BOTH, distance_desired);
-		}
+		lre_move_distance(distance_desired);
 	}
 	// move rotate
-		if ((argv[1][0]== 0x73) && (argv[1][1]== 0x74)) // first letter s, second letter t in hex
-		{
-				lre_stepper_stop(STEPPER_BOTH);
-		}
+	if ((argv[1][0]== 0x73) && (argv[1][1]== 0x74)) // first letter s, second letter t in hex
+	{
+		int32_t degree = cmd_str2Num(argv[2], (uint8_t)10);
+		lre_move_rotate(degree);
+	}
 }
 
 void lre_maze_com(int argc, char **argv)

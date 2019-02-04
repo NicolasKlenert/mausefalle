@@ -26,6 +26,7 @@ typedef struct{
 	int16_t step_freq;			// steps/s
 	int16_t desired_step_freq;	// steps/s
 	int16_t max_distance;
+	uint8_t active;
 }stepper_struct;
 
 // variables
@@ -43,6 +44,7 @@ stepper_struct stepper_left = {{
 		0,
 		0,
 		0,
+		0,
 		0};
 stepper_struct stepper_right = {{
 		0b0001000000,
@@ -54,6 +56,7 @@ stepper_struct stepper_right = {{
 		0b1000000000,
 		0b1001000000 },
 		0b1111110000111111,
+		0,
 		0,
 		0,
 		0,
@@ -83,10 +86,6 @@ void lre_stepper_init(void)
 	// TIM init
 	TIM_TimeBaseInit(TIM16, &timerInitStruct);
 	TIM_TimeBaseInit(TIM17, &timerInitStruct);
-
-	// TIM start
-	TIM_Cmd(TIM16, ENABLE);
-	TIM_Cmd(TIM17, ENABLE);
 
 	// TIM IT init
 	TIM_ITConfig(TIM16, TIM_IT_Update, ENABLE);
@@ -133,19 +132,36 @@ void lre_stepper_init(void)
 	}
 }
 
+//returns state of stepper. (used to know if stepper is disabled)
+uint8_t lre_stepper_idle(uint8_t stepper_x){
+	if((stepper_x & STEPPER_RIGHT) && stepper_right.active){
+		return FALSE;
+	}
+	if ((stepper_x & STEPPER_LEFT) && stepper_left.active){
+		return FALSE;
+	}
+	return TRUE;
+}
+
 void lre_stepper_stop(uint8_t stepper_x)
 {
 	if(stepper_x & STEPPER_RIGHT){
 		stepper_right.desired_step_freq = 0;	// set desired step freq to 0
 		stepper_right.step_freq = 0;			// set step freq to 0
 		stepper_right.current_step = 0;
+		//disable stepper
+		stepper_right.active = FALSE;
 		TIM_SetAutoreload(TIM16, 0xFFFF);		// set the Timer period to maximum
+		TIM_Cmd(TIM16, DISABLE);
 	}
 	if(stepper_x & STEPPER_LEFT){
 		stepper_left.desired_step_freq = 0;
 		stepper_left.step_freq = 0;
 		stepper_left.current_step = 0;
+		//disable stepper
+		stepper_left.active = FALSE;
 		TIM_SetAutoreload(TIM17, 0xFFFF);		// set the Timer period to maximum
+		TIM_Cmd(TIM17, DISABLE);
 	}
 }
 
@@ -160,13 +176,19 @@ void lre_stepper_setSpeed(int8_t speed_mm_s, uint8_t stepper_x, int16_t max_dist
 {
 	if (stepper_x & STEPPER_RIGHT)
 	{
+		// TIM start
+		TIM_Cmd(TIM16, ENABLE);
 		stepper_right.desired_step_freq = (int16_t)( speed_mm_s * STEPS_PER_MM );	// convert the speed to a step frequency
 		stepper_right.max_distance = max_distance;
+		stepper_right.active = TRUE;
 	}
 	if (stepper_x & STEPPER_LEFT)
 	{
+		// TIM start
+		TIM_Cmd(TIM17, ENABLE);
 		stepper_left.desired_step_freq = (int16_t)( -speed_mm_s * STEPS_PER_MM );	// negativ so steppers turn in same direction
 		stepper_left.max_distance = max_distance;
+		stepper_left.active = TRUE;
 	}
 }
 
@@ -251,6 +273,8 @@ void stepper_acceleration_ramp(TIM_TypeDef *tim, stepper_struct *stepper)
 	if (stepper->step_freq == 0)
 	{
 		timer_period = 0xFFFF;
+		TIM_Cmd(tim, DISABLE);
+		stepper->active = FALSE;
 	}
 	else
 	{
@@ -267,8 +291,6 @@ void TIM16_IRQHandler(void)
 	// check which interrupt event occurred
 	if (SET == TIM_GetITStatus(TIM16, TIM_IT_Update))
 	{
-		// reset ITPendingBit
-		TIM_ClearITPendingBit(TIM16, TIM_IT_Update);
 		if(abs(lre_stepper_getMovedDistance(STEPPER_RIGHT)) >= abs(stepper_right.max_distance) && stepper_right.max_distance != 0){
 			// already traveled max_distance
 			lre_stepper_stop(STEPPER_RIGHT);
@@ -281,6 +303,8 @@ void TIM16_IRQHandler(void)
 				stepper_acceleration_ramp(TIM16, &stepper_right);		// change the frequency according to acceleration
 			}
 		}
+		// reset ITPendingBit
+		TIM_ClearITPendingBit(TIM16, TIM_IT_Update);
 	}
 }
 
@@ -292,8 +316,6 @@ void TIM17_IRQHandler(void)
 	// check which interrupt event occurred
 	if (SET == TIM_GetITStatus(TIM17, TIM_IT_Update))
 	{
-		// reset ITPendingBit
-		TIM_ClearITPendingBit(TIM17, TIM_IT_Update);
 		if(abs(lre_stepper_getMovedDistance(STEPPER_LEFT)) >= abs(stepper_left.max_distance) && stepper_left.max_distance != 0){
 			// already traveled max_distance
 			lre_stepper_stop(STEPPER_LEFT);
@@ -309,5 +331,7 @@ void TIM17_IRQHandler(void)
 				stepper_acceleration_ramp(TIM17, &stepper_left);		// change the frequency according to acceleration
 			}
 		}
+		// reset ITPendingBit
+		TIM_ClearITPendingBit(TIM17, TIM_IT_Update);
 	}
 }

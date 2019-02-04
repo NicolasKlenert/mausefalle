@@ -21,6 +21,7 @@
 
 // function prototypes
 void lre_stepper_init(void);
+uint8_t lre_stepper_idle(uint8_t stepper_x);
 void lre_stepper_setSpeed(int8_t speed_mm_s, uint8_t stepper_x, int16_t max_distance);
 int16_t lre_stepper_getMovedDistance(uint8_t stepper_x);
 void lre_stepper_stop(uint8_t stepper_x);
