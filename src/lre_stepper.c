@@ -4,7 +4,7 @@
  *  Created on: 14.01.2019
  *      Author: JoBire
  */
-
+#include "main.h"
 #include "lre_stepper.h"
 #include "lre_execution_time.h"
 #include "lre_usart.h"
@@ -283,7 +283,7 @@ void stepper_acceleration_ramp(TIM_TypeDef *tim, stepper_struct *stepper)
 	TIM_SetAutoreload(tim, timer_period);		// set the new Timer period
 }
 
-/* Execution time: 5µs ... 15µs
+/* Execution time: 5ï¿½s ... 15ï¿½s
  *
  * */
 void TIM16_IRQHandler(void)
@@ -308,7 +308,7 @@ void TIM16_IRQHandler(void)
 	}
 }
 
-/* Execution time: 5µs ... 15µs
+/* Execution time: 5ï¿½s ... 15ï¿½s
  *
  * */
 void TIM17_IRQHandler(void)

@@ -14,6 +14,34 @@
 
 #define LRE_MOVE_DISTANCE_BETWEEN_WHEELS_MM	100	//distance between the middle of the wheels in mm
 #define LRE_MOVE_DEFAULT_SPEED 60
+// -------------------- (ControlLer Stuff) -------------------------
+#define LRE_MOVE_CONTROLLER_FREQ 100	// Frequency of Controller in Hz
+#define LRE_MOVE_TIMER_FREQ 10000 		// Frequency of TIM7 in Hz (minimum 734 Hz!!!)
+#define LRE_MOVE_TIMER_PERIOD (uint16_t)(( LRE_MOVE_TIMER_FREQ / LRE_MOVE_CONTROLLER_FREQ ) - 1 )	// Period of TIM7
+
+// Reglerstruct
+typedef struct{
+	int16_t controller_speed;   			// mm/s
+	int16_t controller_desired_distance;	// mm
+	int16_t wall_distance;					// mm
+	int16_t error;
+	int16_t corrector;
+	int16_t differential;
+	int16_t integral;
+
+}controller_struct;
+
+// variables
+controller_struct controller = {
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0};
+
+// -------------------- functions -------------------------
 
 //positive degree is a rotation to the left!
 void lre_move_rotate(int8_t degree){
@@ -58,27 +86,12 @@ void lre_move_stop(){
 // -------------------- CONTROLLER STUFF ---------------------
 
 
-#define LRE_MOVE_CONTROLLER_FREQ 100	// Frequency of Controller in Hz
-#define LRE_MOVE_TIMER_FREQ 10000 		// Frequency of TIM7 in Hz (minimum 734 Hz!!!)
-#define LRE_MOVE_TIMER_PERIOD (uint16_t)(( LRE_MOVE_TIMER_FREQ / LRE_MOVE_CONTROLLER_FREQ ) - 1 )	// Period of TIM7
 
-// Reglerstruct
-typedef struct{
-	int16_t controller_speed;   	// mm/s
-	int16_t controller_desired_distance;	// mm
-	int16_t wall_distance;			// mm
-}controller_struct;
-
-// variables
-controller_struct controller = {
-		0,
-		0,
-		0};
 
 // Timer fuer die Regelung initialisieren
 void lre_controller_init()
 {
-	// RCC enable TIM6
+	// RCC enable TIM7
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM7, ENABLE);
 	// RCC enable Sysconfig for interrupts
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG,ENABLE);
@@ -114,12 +127,20 @@ void lre_controller_start()
 {
 	// Enable TIM7 IRQn
 	NVIC_EnableIRQ(TIM7_IRQn);
+	moveMode = MOVE_ACTIVE;
+	control_flag = FALSE;
+	controller.error=0;
+	controller.differential=0;
+	controller.integral=0;
 }
 // Timer fuer die Regelung abschalten
 void lre_controller_stop()
 {
 	// Disable TIM7 IRQn (interrupt handler will not be called anymore)
 	NVIC_DisableIRQ(TIM7_IRQn);
+	moveMode = MOVE_IDLE;
+	control_flag = TRUE;
+
 }
 
 /* move_straight setzt die Parameter des controller_structs auf von aussen gewuenschte Werte
@@ -129,17 +150,79 @@ void lre_controller_stop()
 void lre_move_straight(int16_t speed, int16_t desired_distance, int16_t wall_distance)
 {
 	//TODO: think about starting the controller here
+	lre_controller_start();
 	controller.controller_speed = speed;
 	controller.controller_desired_distance = desired_distance;
 	controller.wall_distance = wall_distance;
 }
 
+
+
 // Regelungsroutine Timer handler
 void TIM7_IRQHandler(void)
 {
-	// check which interrupt occured
+	// check which interrupt occoured
 	if(SET == TIM_GetITStatus(TIM7, TIM_IT_Update))
 	{
+		int rightWall	= FALSE;
+		int leftWall 	= FALSE;
+
+
+		if(mouse_distance[0] < THRESHOLD_FRONT) // check if mouse is to close to wall
+		{
+			// ckeck if mouse sees a wall on the right or left
+			if(mouse_distance[1]<=(2*controller.wall_distance))	// ab 2 mal Wandabstand wird keine Wand erkannt.
+			{
+				rightWall=TRUE;
+			}
+
+			if(mouse_distance[2]<=(2*controller.wall_distance))	// ab 2 mal Wandabstand wird keine Wand erkannt.
+			{
+				leftWall=TRUE;
+			}
+
+			// Control algorithm depending on witch wall it sees
+
+			// MODE 1: NO Wall
+			if((leftWall==FALSE) && (rightWall==FALSE))
+			{
+				lre_stepper_setSpeed(controller.controller_speed, STEPPER_BOTH, controller.controller_desired_distance);
+			}
+
+			// MODE 2: only left Wall
+			if((leftWall==TRUE) && (rightWall==FALSE))
+			{
+				lre_controller_leftWall();
+			}
+
+			// MODE 3: only right Wall
+			if((leftWall==FALSE) && (rightWall==TRUE))
+			{
+				lre_controller_rightWall();
+			}
+
+			// MODE 4: both Wall
+			if((leftWall==TRUE) && (rightWall==TRUE))
+			{
+				lre_controller_bothWalls();
+			}
+
+
+		}
+		else
+		{
+		control_flag = TRUE;
+		}
+
+		//abort criteria because the desired distance is past
+		if(abs(lre_stepper_getMovedDistance(STEPPER_RIGHT))>controller.controller_desired_distance)
+			{
+			control_flag = TRUE; //abort criteria because the desired distance is past
+			}
+
+		if (control_flag==TRUE){
+			lre_controller_stop();
+		}
 		// reset interrupt pending bit
 		TIM_ClearITPendingBit(TIM17, TIM_IT_Update);
 
