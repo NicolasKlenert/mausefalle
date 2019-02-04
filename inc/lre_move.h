@@ -8,6 +8,8 @@
 #ifndef LRE_MOVE_H_
 #define LRE_MOVE_H_
 
+#include "stm32f0xx.h"
+
 
 // function prototypes
 void lre_controller_init();
