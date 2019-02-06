@@ -70,7 +70,7 @@ void usart_init(){
 	NVIC_InitTypeDef nvicUsart3;
 	nvicUsart3.NVIC_IRQChannel = USART3_4_IRQn;
 	nvicUsart3.NVIC_IRQChannelCmd = ENABLE;
-	nvicUsart3.NVIC_IRQChannelPriority = 1;	// can be 0 to 3
+	nvicUsart3.NVIC_IRQChannelPriority = 3;	// can be 0 to 3
 	NVIC_Init(&nvicUsart3);
 }
 

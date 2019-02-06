@@ -17,7 +17,7 @@
 #include "lre_wait.h"
 //#include "lre_gyro.h"
 #include "lre_sensor.h"
-#include "lre_l3gd20.h"
+//#include "lre_l3gd20.h"
 #include "lre_stepper.h"
 #include "lre_usart.h"
 #include "lre_queue.h"
