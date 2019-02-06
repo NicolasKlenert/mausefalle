@@ -155,7 +155,7 @@ void TIM7_IRQHandler(void)
 	{
 		int rightWall	= FALSE;
 		int leftWall 	= FALSE;
-
+		lre_ledToggle(ledLeft);
 
 		if(mouse_distance[0] < THRESHOLD_FRONT) // check if mouse is to close to wall
 		{
