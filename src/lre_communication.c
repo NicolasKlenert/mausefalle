@@ -71,8 +71,11 @@ void lre_move(int argc, char **argv)
 
 	// move line
 	if ((argv[1][0]== 0x6C) && (argv[1][1]== 0x6E)) // first letter l, second letter n in hex
-	{
-		lre_move_straight(20, 0, 50);
+	{	char str[40];
+		lre_move_straight(20, 0, 80);
+		sprintf(str,"Vorne: %d", (int16_t)mouse_distance[0]);
+		send_usart_string(str);
+
 	}
 	// move speed
 	if ((argv[1][0]== 0x73) && (argv[1][1]== 0x70)) // first letter s, second letter p in hex
