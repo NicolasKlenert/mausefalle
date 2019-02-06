@@ -25,6 +25,21 @@ uint8_t moveMode; //use to signalise, if a moving is occouring or not
 
 uint8_t control_flag; // use in controllerHandler to check if abort criteria is met
 
+// Reglerstruct
+typedef struct{
+	int16_t controller_speed;   			// mm/s
+	int16_t controller_desired_distance;	// mm
+	int16_t wall_distance;					// mm
+	int16_t error;
+	int16_t corrector;
+	int16_t differential;
+	int16_t integral;
+
+}controller_struct;
+
+// variables
+controller_struct controller;
+
 // ---------------- Move Stuff ------------ //
 
 void lre_move_rotate(int8_t degree);

@@ -31,6 +31,7 @@ void lre_communication_init()
 	cmd_add("mv", &lre_move);
 	cmd_add("tm", &lre_telemetrie);
 	cmd_add("mz", &lre_maze_com);
+	cmd_add("", &lre_move_straight);
 }
 
 
@@ -68,7 +69,14 @@ void lre_telemetrie(int argc, char **argv)
 
 void lre_move(int argc, char **argv)
 {
-	lre_ledOn(ledRight);
+
+
+	// move line
+	if ((argv[1][0]== 0x6C) && (argv[1][1]== 0x6E)) // first letter l, second letter n in hex
+	{
+		int8_t speed = cmd_str2Num(argv[2], (uint8_t)10);
+		lre_move_straight(50, 1000, 50);
+	}
 	// move speed
 	if ((argv[1][0]== 0x73) && (argv[1][1]== 0x70)) // first letter s, second letter p in hex
 	{

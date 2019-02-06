@@ -19,19 +19,7 @@
 #define LRE_MOVE_TIMER_FREQ 10000 		// Frequency of TIM7 in Hz (minimum 734 Hz!!!)
 #define LRE_MOVE_TIMER_PERIOD (uint16_t)(( LRE_MOVE_TIMER_FREQ / LRE_MOVE_CONTROLLER_FREQ ) - 1 )	// Period of TIM7
 
-// Reglerstruct
-typedef struct{
-	int16_t controller_speed;   			// mm/s
-	int16_t controller_desired_distance;	// mm
-	int16_t wall_distance;					// mm
-	int16_t error;
-	int16_t corrector;
-	int16_t differential;
-	int16_t integral;
 
-}controller_struct;
-
-// variables
 controller_struct controller = {
 		0,
 		0,
@@ -41,12 +29,13 @@ controller_struct controller = {
 		0,
 		0};
 
+
 // -------------------- functions -------------------------
 
 //positive degree is a rotation to the left!
 void lre_move_rotate(int8_t degree){
 	moveMode = MOVE_ACTIVE;
-	int8_t distanceToTravel = degree * LRE_MOVE_DISTANCE_BETWEEN_WHEELS_MM * M_PI / 180.0;
+	int8_t distanceToTravel = degree * LRE_MOVE_DISTANCE_BETWEEN_WHEELS_MM * M_PI / 360.0;
 	int8_t speed = LRE_MOVE_DEFAULT_SPEED;
 	if(distanceToTravel < 0){
 		speed *= -1;
@@ -117,7 +106,7 @@ void lre_controller_init()
 	NVIC_InitTypeDef nvicTIM7;
 	nvicTIM7.NVIC_IRQChannel = TIM7_IRQn;
 	nvicTIM7.NVIC_IRQChannelCmd = DISABLE;
-	nvicTIM7.NVIC_IRQChannelPriority = 3;	// can be 0 to 3
+	nvicTIM7.NVIC_IRQChannelPriority = 2;	// can be 0 to 3
 	NVIC_Init(&nvicTIM7);
 
 }
