@@ -12,7 +12,7 @@
 #include "math.h"
 #include "lre_stepper.h"
 
-#define LRE_MOVE_DISTANCE_BETWEEN_WHEELS_MM	100	//distance between the middle of the wheels in mm
+#define LRE_MOVE_DISTANCE_BETWEEN_WHEELS_MM	88	//distance between the middle of the wheels in mm
 #define LRE_MOVE_DEFAULT_SPEED 60
 // -------------------- (ControlLer Stuff) -------------------------
 #define LRE_MOVE_CONTROLLER_FREQ 50	// Frequency of Controller in Hz
@@ -24,9 +24,9 @@ controller_struct controller = { 0, 0, 0, 0, 0, 0, 0 };
 // -------------------- functions -------------------------
 
 //positive degree is a rotation to the left!
-void lre_move_rotate(int8_t degree) {
+void lre_move_rotate(int16_t degree) {
 	moveMode = MOVE_ACTIVE;
-	int8_t distanceToTravel = degree * LRE_MOVE_DISTANCE_BETWEEN_WHEELS_MM
+	int16_t distanceToTravel = degree * LRE_MOVE_DISTANCE_BETWEEN_WHEELS_MM
 			* M_PI / 360.0;
 	int8_t speed = LRE_MOVE_DEFAULT_SPEED;
 	if (distanceToTravel < 0) {

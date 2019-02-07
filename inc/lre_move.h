@@ -42,7 +42,7 @@ controller_struct controller;
 
 // ---------------- Move Stuff ------------ //
 
-void lre_move_rotate(int8_t degree);
+void lre_move_rotate(int16_t degree);
 //only for commands
 void lre_move_distance(int16_t distance);
 void lre_move_speed(int8_t speed);
