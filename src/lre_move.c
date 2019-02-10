@@ -134,7 +134,7 @@ void lre_move_straight(int16_t speed, int16_t desired_distance,
 
 // Regelungsroutine Timer handler
 void TIM7_IRQHandler(void) {
-	// check which interrupt occoured
+	// check which interrupt occurred
 	if (SET == TIM_GetITStatus(TIM7, TIM_IT_Update)) {
 		int rightWall = FALSE;
 		int leftWall = FALSE;
@@ -185,9 +185,6 @@ void TIM7_IRQHandler(void) {
 				> controller.controller_desired_distance)
 				&& (controller.controller_desired_distance != 0)) {
 			control_flag = TRUE; //abort criteria because the desired distance is past
-
-			// TODO i think here the steppers should be stopped?
-
 		}
 
 		if (control_flag == TRUE) {
