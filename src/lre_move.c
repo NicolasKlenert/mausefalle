@@ -11,6 +11,7 @@
 
 #include "math.h"
 #include "lre_stepper.h"
+#include "lre_controler.h"
 
 #define LRE_MOVE_DISTANCE_BETWEEN_WHEELS_MM	88	//distance between the middle of the wheels in mm
 #define LRE_MOVE_DEFAULT_SPEED 60
