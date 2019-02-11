@@ -50,34 +50,50 @@ char printChar(uint8_t i, uint8_t j, uint16_t id){
 			return upperLeftCornerChar;
 		}else if(j == widthRoom -1){
 			return upperRightCornerChar;
-		}else if(indexIsMid(j,widthRoom) && hasGate(id,DIR_NORTH)){
-			return ' ';
-		}else{
-			return upperWallChar;
+		}else if(indexIsMid(j,widthRoom)){
+			if(hasGate(id,DIR_NORTH)){
+				return ' ';
+			}
+			if(!isVisited(id)){
+				return '?';
+			}
 		}
+		return upperWallChar;
 	}else if(i == heightRoom -1){
 		if(j == 0){
 			return bottomLeftCornerChar;
 		}else if(j == widthRoom -1){
 			return bottomRightCornerChar;
-		}else if(indexIsMid(j,widthRoom) && hasGate(id,DIR_SOUTH)){
-			return ' ';
-		}else{
-			return bottomWallChar;
+		}else if(indexIsMid(j,widthRoom)){
+			if(hasGate(id,DIR_SOUTH)){
+				return ' ';
+			}
+			if(!isVisited(id)){
+				return '?';
+			}
 		}
+		return bottomWallChar;
 	}
 	if(j == 0){
-		if(indexIsMid(i,heightRoom) && hasGate(id,DIR_WEST)){
-			return ' ';
-		}else{
-			return leftWallChar;
+		if(indexIsMid(i,heightRoom)){
+			if(!isVisited(id)){
+				return '?';
+			}
+			if(hasGate(id,DIR_WEST)){
+				return ' ';
+			}
 		}
+		return leftWallChar;
 	}else if(j == widthRoom -1){
-		if(indexIsMid(i,heightRoom) && hasGate(id,DIR_EAST)){
-			return ' ';
-		}else{
-			return leftWallChar;
+		if(indexIsMid(i,heightRoom)){
+			if(!isVisited(id)){
+				return '?';
+			}
+			if(hasGate(id,DIR_EAST)){
+				return ' ';
+			}
 		}
+		return rightWallChar;
 	}
 	return ' ';
 }
@@ -99,10 +115,10 @@ void printLabyrinth(char *arr){
 	for(uint16_t id = 0; id < numCols * numRows; id++){
 		printRoom(id,arr);
 	}
-	uint16_t lineWidth = numCols * widthRoom;
-	for(uint16_t i = 0; i < numRows*heightRoom; i++){
-		arr[i*lineWidth] = '\r';
-		arr[i*(lineWidth+1)] = '\n';
+	uint16_t lineWidth = (numCols * widthRoom)+2;
+	for(uint16_t i = 1; i <= numRows*heightRoom; i++){
+		arr[(i*lineWidth)-2] = '\r';
+		arr[(i*lineWidth)-1] = '\n';
 	}
 }
 
