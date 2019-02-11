@@ -8,9 +8,13 @@
 #ifndef LRE_USART_H_
 #define LRE_USART_H_
 
-void usart_init();
+void lre_usart_init();
 void send_usart_string(char str[]);
-void send_usart_letter(char letter);
 void hreadable_floats(float number, char *buf);
+
+#ifndef FALSE
+#define FALSE 0;
+#define TRUE 1;
+#endif
 
 #endif /* LRE_USART_H_ */
