@@ -34,6 +34,10 @@ typedef struct{
 	int16_t corrector;
 	int16_t differential;
 	int16_t integral;
+	float thetaAlt;
+	int16_t dlAlt;
+	int16_t drAlt;
+	int16_t sensorAlt;
 
 }controller_struct;
 

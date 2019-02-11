@@ -108,6 +108,11 @@ void lre_controller_start() {
 	controller.error = 0;
 	controller.differential = 0;
 	controller.integral = 0;
+	controller.thetaAlt = 0;
+	controller.dlAlt = 0;
+	controller.drAlt = 0;
+	controller.sensorAlt = controller.wall_distance;
+
 }
 // Timer fuer die Regelung abschalten
 void lre_controller_stop() {
@@ -126,10 +131,10 @@ void lre_controller_stop() {
 void lre_move_straight(int16_t speed, int16_t desired_distance,
 		int16_t wall_distance) {
 	//TODO: think about starting the controller here
-	lre_controller_start();
 	controller.controller_speed = speed;
 	controller.controller_desired_distance = desired_distance;
 	controller.wall_distance = wall_distance;
+	lre_controller_start();
 }
 
 // Regelungsroutine Timer handler
