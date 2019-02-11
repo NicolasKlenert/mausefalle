@@ -17,10 +17,11 @@
 #include "lre_wait.h"
 //#include "lre_gyro.h"
 #include "lre_sensor.h"
-#include "lre_l3gd20.h"
+//#include "lre_l3gd20.h"
 #include "lre_stepper.h"
 #include "lre_usart.h"
 #include "lre_queue.h"
+#include "lre_move.h"
 #include "mouse.h"
 #include "main.h"
 
@@ -45,16 +46,18 @@ void error(char* string){
 int main(void){
 	//init waiter
 	lre_wait_init();
+	// init controller
+	lre_controller_init();
 	//init usart
-		usart_init();
+	lre_usart_init();
 	// init stepper
-		lre_stepper_init();
+	lre_stepper_init();
 	// init communication
-		lre_communication_init();
+	lre_communication_init();
 	//init sensors
-		lre_sensor_init();
-//		lre_gyro_init();
-		led_status_init();
+	lre_sensor_init();
+	//lre_gyro_init();
+	led_status_init();
 
 //		lre_l3gd20_init();
 //		lre_l3gd20_InterruptCmd(ENABLE);

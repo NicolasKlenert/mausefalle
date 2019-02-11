@@ -4,17 +4,17 @@
  *  Created on: 14.01.2019
  *      Author: JoBire
  */
-
+#include "main.h"
 #include "lre_stepper.h"
 #include "lre_execution_time.h"
 #include "lre_usart.h"
 #include "lre_wait.h"
+#include "math.h"
 
 // defines
 #define TIMER_FREQ 1000000			// Frequency of the stepper timers TIM16 & TIM17
-#define ACCELERATION (float)30.0			// acceleration in mm/s^2
 #define WHEEL_DIAMETER (float)80.0			// Wheel diameter in mm
-#define STEPS_PER_MM (float)( 4096.0 / (3.14159265359 * WHEEL_DIAMETER) )
+#define STEPS_PER_MM (float)( 4096.0 / (M_PI * WHEEL_DIAMETER) )
 #define ACC_STEPS_PER_SEC (int16_t)( ACCELERATION * STEPS_PER_MM )		// acceleration in steps/s^2
 
 // typedef
@@ -128,7 +128,7 @@ void lre_stepper_init(void)
 		portValue |= stepper_right.step_table[i];	// set new Pins right
 		portValue |= stepper_left.step_table[i];	// set new Pins left
 		GPIO_Write(GPIOB, portValue);	// write new Pins
-		lre_wait(100);
+		lre_wait(10);		// equals a step freq of 100 Hz
 	}
 }
 
@@ -169,7 +169,7 @@ void lre_stepper_stop(uint8_t stepper_x)
  *
  * @param speed: desired speed in mm/s (-90 ... 90)
  * @param stepper_x: STEPPER_RIGHT or STEPPER_LEFT or STEPPER_BOTH
- * @param max_distance: the maximal distance traveling is allowed in [mm]. If 0 is given, then is it seen aas infinity
+ * @param max_distance: the maximal distance traveling is allowed in [mm]. If 0 is given, then is it seen as infinity
  *
  * */
 void lre_stepper_setSpeed(int8_t speed_mm_s, uint8_t stepper_x, int16_t max_distance)
@@ -283,7 +283,7 @@ void stepper_acceleration_ramp(TIM_TypeDef *tim, stepper_struct *stepper)
 	TIM_SetAutoreload(tim, timer_period);		// set the new Timer period
 }
 
-/* Execution time: 5탎 ... 15탎
+/* Execution time: 5us ... 15us
  *
  * */
 void TIM16_IRQHandler(void)
@@ -308,7 +308,7 @@ void TIM16_IRQHandler(void)
 	}
 }
 
-/* Execution time: 5탎 ... 15탎
+/* Execution time: 5us ... 15us
  *
  * */
 void TIM17_IRQHandler(void)
@@ -320,9 +320,6 @@ void TIM17_IRQHandler(void)
 			// already traveled max_distance
 			lre_stepper_stop(STEPPER_LEFT);
 		}else{
-//			char string[50];
-//			sprintf(string, "%d",lre_stepper_getMovedDistance(STEPPER_LEFT));
-//			send_usart_string(string);
 			// perform next step
 			stepper_nextStep(&stepper_left);
 			// check if the step frequency has to be changed

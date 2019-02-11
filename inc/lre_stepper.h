@@ -19,6 +19,8 @@
 #define STEPPER_LEFT	0b10		// belongs to TIM17
 #define STEPPER_BOTH	0b11
 
+#define ACCELERATION (float)30.0			// acceleration in mm/s^2
+
 // function prototypes
 void lre_stepper_init(void);
 uint8_t lre_stepper_idle(uint8_t stepper_x);

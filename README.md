@@ -37,19 +37,22 @@ See https://help.github.com/articles/cloning-a-repository/ for the instructions 
 * TIM1 for the sensors
 * TIM2 for execution time measurement
 * TIM3 for the LEDs
+* TIM6 for USART - sending Strings
 * TIM7 for controller
 * TIM16 and TIM17 for the wheels (F_TIM 1 MHz)
 
 # Interrupt's
 
-* Ultrasonic Sensors (EXTI4_15_Line) 
-	Priority: 
+* Ultrasonic Sensors (EXTI4_15_Line)
+	Priority: 1
 * Stepper's (TIM16_IRQn TIM17_IRQn)
 	Priority: 1
+* Sending Strings (TIM6_DAC_IRQn)
+	Priority: 1
 * Communication (USART3_4_IRQn)
-	Priority: 
-* Control loop (TIM7_IRQn)
 	Priority: 3
+* Control loop (TIM7_IRQn)
+	Priority: 2
 
 # Programming Standards
 
