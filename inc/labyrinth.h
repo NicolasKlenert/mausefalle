@@ -29,8 +29,8 @@
 #define upperRightCornerChar ' '
 #define bottomLeftCornerChar '|'
 #define bottomRightCornerChar '|'
-#define heightRoom 2
-#define widthRoom 3
+#define heightRoom 3
+#define widthRoom 5
 
 //arr has to be ((numCols*widthRoom)+2)*(numRows*heightRoom) big
 void printLabyrinth(char *arr);
