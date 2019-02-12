@@ -31,6 +31,7 @@ void lre_communication_init()
 	cmd_add("mv", &lre_move);
 	cmd_add("tm", &lre_telemetrie);
 	cmd_add("mz", &lre_maze_com);
+	cmd_add("ma", &lre_maneuver);
 
 }
 
@@ -38,6 +39,49 @@ void lre_communication_init()
 /* Hier sollen die Funktionen aus der communication
  *
  */
+
+//
+void lre_maneuver(int argc, char **argv)
+{
+	// park: "ma pk front_distance reverse_distance"
+	if ( (argv[1][0] == 'p') && (argv[1][1] == 'k') )
+	{
+		int16_t distance1 = cmd_str2Num(argv[2], (uint8_t)10);
+		int16_t distance2 = cmd_str2Num(argv[3], (uint8_t)10);
+		lre_move_straight(50, 0, 1, distance1);
+		while(moveMode == MOVE_ACTIVE)
+		{
+			//
+		}
+		lre_move_rotate(180);
+		while(moveMode == MOVE_ACTIVE)
+		{
+			//
+		}
+		lre_move_distance(-distance2);
+		while(moveMode == MOVE_ACTIVE)
+		{
+			//
+		}
+	}
+	// corner: "ma co"
+	if ( (argv[1][0]) && (argv[1][1]) )
+	{
+		// check distance
+		int16_t mindis = (int16_t) mouse_distance[1] > mouse_distance[2] ? mouse_distance[2] : mouse_distance[1];
+		lre_move_straight(50, 0, 1, mindis + 35);
+		while(moveMode == MOVE_ACTIVE)
+		{
+			//
+		}
+		lre_move_rotate(90);
+		while(moveMode == MOVE_ACTIVE)
+		{
+			//
+		}
+		lre_move_distance(700);
+	}
+}
 
 void lre_telemetrie(int argc, char **argv)
 {	// Telemetrie Ultra-sonic sensors
@@ -72,7 +116,7 @@ void lre_move(int argc, char **argv)
 	// move line
 	if ((argv[1][0]== 0x6C) && (argv[1][1]== 0x6E)) // first letter l, second letter n in hex
 	{	char str[40];
-		lre_move_straight(20, 0, 80);
+		lre_move_straight(20, 0, 80, THRESHOLD_FRONT);
 		sprintf(str,"Vorne: %d", (int16_t)mouse_distance[0]);
 		send_usart_string(str);
 

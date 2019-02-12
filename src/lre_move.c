@@ -129,11 +129,12 @@ void lre_controller_stop() {
  */
 
 void lre_move_straight(int16_t speed, int16_t desired_distance,
-		int16_t wall_distance) {
+		int16_t wall_distance, int16_t front_distance) {
 	//TODO: think about starting the controller here
 	controller.controller_speed = speed;
 	controller.controller_desired_distance = desired_distance;
 	controller.wall_distance = wall_distance;
+	controller.front_distance = front_distance;
 	lre_controller_start();
 }
 
@@ -144,7 +145,7 @@ void TIM7_IRQHandler(void) {
 		int rightWall = FALSE;
 		int leftWall = FALSE;
 
-		if ((int16_t) mouse_distance[0] > THRESHOLD_FRONT) // check if mouse is to close to wall
+		if ((int16_t) mouse_distance[0] > controller.front_distance) // check if mouse is to close to wall
 		{
 			// ckeck if mouse sees a wall on the right or left
 			if ((int16_t) mouse_distance[1] <= (2 * controller.wall_distance))// ab 2 mal Wandabstand wird keine Wand erkannt.
@@ -161,7 +162,6 @@ void TIM7_IRQHandler(void) {
 
 			// MODE 1: NO Wall
 			if ((leftWall == FALSE) && (rightWall == FALSE)) {
-				lre_ledToggle(ledLeft);
 				lre_stepper_setSpeed(controller.controller_speed, STEPPER_BOTH,
 						controller.controller_desired_distance);
 			}
@@ -193,7 +193,6 @@ void TIM7_IRQHandler(void) {
 		}
 
 		if (control_flag == TRUE) {
-			lre_ledToggle(ledRight);
 			lre_controller_stop();
 		}
 		// reset interrupt pending bit

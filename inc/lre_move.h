@@ -30,6 +30,7 @@ typedef struct{
 	int16_t controller_speed;   			// mm/s
 	int16_t controller_desired_distance;	// mm
 	int16_t wall_distance;					// mm
+	int16_t front_distance;
 	int16_t error;
 	int16_t corrector;
 	int16_t differential;
@@ -51,7 +52,7 @@ void lre_move_rotate(int16_t degree);
 void lre_move_distance(int16_t distance);
 void lre_move_speed(int8_t speed);
 void lre_move_stop();
-void lre_move_straight(int16_t speed, int16_t distance, int16_t wallDistance);
+void lre_move_straight(int16_t speed, int16_t desired_distance, int16_t wall_distance, int16_t front_distance);
 
 // ---------------- Controller Stuff -------- //
 

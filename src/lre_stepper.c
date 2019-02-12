@@ -13,7 +13,7 @@
 
 // defines
 #define TIMER_FREQ 1000000			// Frequency of the stepper timers TIM16 & TIM17
-#define WHEEL_DIAMETER (float)80.0			// Wheel diameter in mm
+#define WHEEL_DIAMETER (float)81.5			// Wheel diameter in mm
 #define STEPS_PER_MM (float)( 4096.0 / (M_PI * WHEEL_DIAMETER) )
 #define ACC_STEPS_PER_SEC (int16_t)( ACCELERATION * STEPS_PER_MM )		// acceleration in steps/s^2
 
