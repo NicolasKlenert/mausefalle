@@ -77,6 +77,7 @@ void lre_usart_init(){
 	timerInitStruct.TIM_RepetitionCounter = 0;
 	TIM_TimeBaseInit(TIM6, &timerInitStruct);
 	TIM_ITConfig(TIM6, TIM_IT_Update, ENABLE);
+	NVIC_InitTypeDef nvicUsartSend;
 	NVIC_EnableIRQ(TIM6_DAC_IRQn);
 	TIM_ClearITPendingBit(TIM6, TIM_IT_Update);		//interrupt is called in the beginning. even if timer is not activated yet
 	//WHY? How can you fix it? clearing the flag does not help.

@@ -75,7 +75,7 @@ void lre_maneuver(int argc, char **argv)
 
 	}
 	// corner: "ma co"
-	if ( (argv[1][0]=='c') && (argv[1][1])=='o' )
+	if ( (argv[1][0]=='c') && (argv[1][1]=='o') )
 	{
 		// check distance
 		int16_t mindis = (int16_t) mouse_distance[2] > mouse_distance[1] ? mouse_distance[1] : mouse_distance[2];

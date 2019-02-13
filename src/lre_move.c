@@ -85,7 +85,7 @@ void lre_controller_init() {
 	TIM_TimeBaseInit(TIM7, &timerInitStruct);
 
 	// TIM start
-	TIM_Cmd(TIM7, ENABLE);
+//	TIM_Cmd(TIM7, ENABLE);
 
 	// TIM7 enable update interrupt
 	TIM_ITConfig(TIM7, TIM_IT_Update, ENABLE);
@@ -93,8 +93,8 @@ void lre_controller_init() {
 	// NVIC config and enable
 	NVIC_InitTypeDef nvicTIM7;
 	nvicTIM7.NVIC_IRQChannel = TIM7_IRQn;
-	nvicTIM7.NVIC_IRQChannelCmd = DISABLE;
-	nvicTIM7.NVIC_IRQChannelPriority = 1;	// can be 0 to 3
+	nvicTIM7.NVIC_IRQChannelCmd = ENABLE;
+	nvicTIM7.NVIC_IRQChannelPriority = 2;	// can be 0 to 3
 	NVIC_Init(&nvicTIM7);
 
 }
@@ -102,7 +102,10 @@ void lre_controller_init() {
 // Timer fuer die Regelung anschalten
 void lre_controller_start() {
 	// Enable TIM7 IRQn
-	NVIC_EnableIRQ(TIM7_IRQn);
+//	NVIC_EnableIRQ(TIM7_IRQn);
+	TIM_SetCounter(TIM7, 0);
+	TIM_ClearITPendingBit(TIM7, TIM_IT_Update);
+	TIM_Cmd(TIM7, ENABLE);
 	moveMode = MOVE_ACTIVE;
 	control_flag = FALSE;
 	controller.error = 0;
@@ -117,7 +120,8 @@ void lre_controller_start() {
 // Timer fuer die Regelung abschalten
 void lre_controller_stop() {
 	// Disable TIM7 IRQn (interrupt handler will not be called anymore)
-	NVIC_DisableIRQ(TIM7_IRQn);
+//	NVIC_DisableIRQ(TIM7_IRQn);
+	TIM_Cmd(TIM7, DISABLE);
 	lre_move_stop();
 
 	control_flag = TRUE;

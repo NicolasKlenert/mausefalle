@@ -13,8 +13,8 @@ void send_usart_string(char str[]);
 void hreadable_floats(float number, char *buf);
 
 #ifndef FALSE
-#define FALSE 0;
-#define TRUE 1;
+#define FALSE 0
+#define TRUE 1
 #endif
 
 #endif /* LRE_USART_H_ */
