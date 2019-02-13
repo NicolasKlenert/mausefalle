@@ -178,7 +178,7 @@ void lre_stepper_setSpeed(int8_t speed_mm_s, uint8_t stepper_x, int16_t max_dist
 	{
 		// TIM start
 		TIM_Cmd(TIM16, ENABLE);
-		stepper_right.desired_step_freq = (int16_t)( speed_mm_s * STEPS_PER_MM );	// convert the speed to a step frequency
+		stepper_right.desired_step_freq = (int16_t)( -speed_mm_s * STEPS_PER_MM );	// convert the speed to a step frequency
 		stepper_right.max_distance = max_distance;
 		stepper_right.active = TRUE;
 	}
@@ -186,7 +186,7 @@ void lre_stepper_setSpeed(int8_t speed_mm_s, uint8_t stepper_x, int16_t max_dist
 	{
 		// TIM start
 		TIM_Cmd(TIM17, ENABLE);
-		stepper_left.desired_step_freq = (int16_t)( -speed_mm_s * STEPS_PER_MM );	// negativ so steppers turn in same direction
+		stepper_left.desired_step_freq = (int16_t)( speed_mm_s * STEPS_PER_MM );	// negativ so steppers turn in same direction
 		stepper_left.max_distance = max_distance;
 		stepper_left.active = TRUE;
 	}
@@ -196,11 +196,11 @@ int16_t lre_stepper_getMovedDistance(uint8_t stepper_x)
 {
 	if (stepper_x & STEPPER_RIGHT)
 	{
-		return stepper_right.current_step / STEPS_PER_MM;
+		return -stepper_right.current_step / STEPS_PER_MM;
 	}
 	if (stepper_x & STEPPER_LEFT)
 	{
-		return -stepper_left.current_step / STEPS_PER_MM;		// negativ because left stepper is inverted
+		return +stepper_left.current_step / STEPS_PER_MM;		// negativ because left stepper is inverted
 	}
 	send_usart_string("get_moved_distance kann den stepper nicht zuordnen");
 	return 0;

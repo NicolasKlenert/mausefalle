@@ -148,14 +148,16 @@ void TIM7_IRQHandler(void) {
 		if ((int16_t) mouse_distance[0] > controller.front_distance) // check if mouse is to close to wall
 		{
 			// ckeck if mouse sees a wall on the right or left
-			if ((int16_t) mouse_distance[1] <= (2 * controller.wall_distance))// ab 2 mal Wandabstand wird keine Wand erkannt.
-					{
-				rightWall = TRUE;
-			}
-
 			if ((int16_t) mouse_distance[2] <= (2 * controller.wall_distance))// ab 2 mal Wandabstand wird keine Wand erkannt.
 					{
+				rightWall = TRUE;
+				lre_ledOn(ledRight);
+			}
+
+			if ((int16_t) mouse_distance[1] <= (2 * controller.wall_distance))// ab 2 mal Wandabstand wird keine Wand erkannt.
+					{
 				leftWall = TRUE;
+				lre_ledOn(ledLeft);
 			}
 
 			// Control algorithm depending on witch wall it sees
@@ -169,11 +171,14 @@ void TIM7_IRQHandler(void) {
 			// MODE 2: only left Wall
 			if ((leftWall == TRUE) && (rightWall == FALSE)) {
 				lre_controller_leftWall();
+				send_usart_string("Linke Wand");
 			}
 
 			// MODE 3: only right Wall
 			if ((leftWall == FALSE) && (rightWall == TRUE)) {
 				lre_controller_rightWall();
+
+				send_usart_string("Rechte Wand");
 			}
 
 			// MODE 4: both Wall

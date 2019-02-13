@@ -7,13 +7,13 @@
 #include "lre_controler.h"
 
 // ---------------- control parameter (hand tuned) ------------ //
-#define K_P 0.1
+#define K_P 10
 #define K_D 0
 #define K_I 0
 
 void lre_controller_leftWall(void)
 {
-	controller.error = (int16_t)mouse_distance[2] - controller.wall_distance;
+	controller.error = (int16_t)mouse_distance[1] - controller.wall_distance;
 	controller.corrector= K_P * controller.error + K_D * (controller.error-controller.differential) + K_I * (controller.error+controller.integral);
 	controller.differential = controller.error;
 	controller.integral=controller.integral + controller.error;
@@ -24,7 +24,7 @@ void lre_controller_leftWall(void)
 
 void lre_controller_rightWall(void)
 {
-	controller.error = (int16_t)mouse_distance[1] -controller.wall_distance;
+	controller.error = (int16_t)mouse_distance[2] -controller.wall_distance;
 	controller.corrector= K_P * controller.error + K_D * (controller.error-controller.differential)+ K_I * (controller.error+controller.integral);;
 	controller.differential = controller.error;
 	controller.integral=controller.integral + controller.error;
@@ -35,7 +35,7 @@ void lre_controller_rightWall(void)
 
 void lre_controller_bothWalls(void)
 {	// wie controller_leftWall
-	controller.error = (int16_t)mouse_distance[2] -controller.wall_distance;
+	controller.error = (int16_t)mouse_distance[1] -controller.wall_distance;
 	controller.corrector= K_P * controller.error + K_D * (controller.error-controller.differential)+ K_I * (controller.error+controller.integral);;
 	controller.differential = controller.error;
 	controller.integral=controller.integral + controller.error;
