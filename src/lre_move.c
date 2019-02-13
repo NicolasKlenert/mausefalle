@@ -13,7 +13,7 @@
 #include "lre_stepper.h"
 #include "lre_controler.h"
 
-#define LRE_MOVE_DISTANCE_BETWEEN_WHEELS_MM	88	//distance between the middle of the wheels in mm
+#define LRE_MOVE_DISTANCE_BETWEEN_WHEELS_MM	92	//distance between the middle of the wheels in mm
 #define LRE_MOVE_DEFAULT_SPEED 60
 // -------------------- (ControlLer Stuff) -------------------------
 #define LRE_MOVE_CONTROLLER_FREQ 50	// Frequency of Controller in Hz
@@ -164,21 +164,20 @@ void TIM7_IRQHandler(void) {
 
 			// MODE 1: NO Wall
 			if ((leftWall == FALSE) && (rightWall == FALSE)) {
-				lre_stepper_setSpeed(controller.controller_speed, STEPPER_BOTH,
-						controller.controller_desired_distance);
+				lre_stepper_setSpeed(controller.controller_speed, STEPPER_BOTH , controller.controller_desired_distance);
 			}
 
 			// MODE 2: only left Wall
 			if ((leftWall == TRUE) && (rightWall == FALSE)) {
 				lre_controller_leftWall();
-				send_usart_string("Linke Wand");
+				//send_usart_string("Linke Wand");
 			}
 
 			// MODE 3: only right Wall
 			if ((leftWall == FALSE) && (rightWall == TRUE)) {
 				lre_controller_rightWall();
 
-				send_usart_string("Rechte Wand");
+				//send_usart_string("Rechte Wand");
 			}
 
 			// MODE 4: both Wall

@@ -59,22 +59,27 @@ void lre_maneuver(int argc, char **argv)
 			//
 		}
 		lre_move_distance(-distance2);
+		//lre_move_straight(-30, 0, 1, distance2);
+
 
 	}
 	// wall: "ma wl walldistance"
-		if ( (argv[1][0] == 'w') && (argv[1][1] == 'l') )
-		{
-			int16_t distance1 = cmd_str2Num(argv[2], (uint8_t)10);
+	if ( (argv[1][0] == 'w') && (argv[1][1] == 'l') )
+	{
+		//int16_t distance1 = cmd_str2Num(argv[2], (uint8_t)10);
 
-			lre_move_straight(50, 2000, distance1, 45);
+		//lre_move_straight(50, 2000, distance1, 45);
+		lre_move_distance(2000);
 
-		}
+
+
+	}
 	// corner: "ma co"
-	if ( (argv[1][0]=='c') && (argv[1][1]=='o') )
+	if ( (argv[1][0]=='c') && (argv[1][1])=='o' )
 	{
 		// check distance
 		int16_t mindis = (int16_t) mouse_distance[2] > mouse_distance[1] ? mouse_distance[1] : mouse_distance[2];
-		lre_move_straight(50, 0, 1, mindis + 35);
+		lre_move_straight(50, 0, 1, mindis);
 		while(moveMode == MOVE_ACTIVE)
 		{
 			//

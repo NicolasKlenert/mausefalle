@@ -11,6 +11,7 @@
 #include "stm32f0xx.h"
 #include "main.h"
 #include "mouse.h"
+#include "lre_usart.h"
 
 // ---------------- constants ------------ //
 #define MOVE_IDLE	0
