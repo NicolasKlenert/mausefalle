@@ -95,13 +95,13 @@ void lre_stepper_init(void)
 	NVIC_InitTypeDef nvicTIM16;
 	nvicTIM16.NVIC_IRQChannel = TIM16_IRQn;
 	nvicTIM16.NVIC_IRQChannelCmd = ENABLE;
-	nvicTIM16.NVIC_IRQChannelPriority = 1;	// can be 0 to 3
+	nvicTIM16.NVIC_IRQChannelPriority = 0;	// can be 0 to 3
 	NVIC_Init(&nvicTIM16);
 
 	NVIC_InitTypeDef nvicTIM17;
 	nvicTIM17.NVIC_IRQChannel = TIM17_IRQn;
 	nvicTIM17.NVIC_IRQChannelCmd = ENABLE;
-	nvicTIM17.NVIC_IRQChannelPriority = 1;	// can be 0 to 3
+	nvicTIM17.NVIC_IRQChannelPriority = 0;	// can be 0 to 3
 	NVIC_Init(&nvicTIM17);
 
 	// GPIO init

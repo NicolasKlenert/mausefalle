@@ -61,25 +61,34 @@ void lre_usart_init(){
 	USART_Cmd(USART3, ENABLE);
 	// Enable UART RX not empty interrupt
 	USART_ITConfig(USART3, USART_IT_RXNE, ENABLE);
+
 	// Enable NVIC for UART3 interrupt
 	NVIC_InitTypeDef nvicUsart3;
 	nvicUsart3.NVIC_IRQChannel = USART3_4_IRQn;
 	nvicUsart3.NVIC_IRQChannelCmd = ENABLE;
 	nvicUsart3.NVIC_IRQChannelPriority = 3;	// can be 0 to 3
 	NVIC_Init(&nvicUsart3);
+
 	//initialise timer 6 to help sending strings
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM6, ENABLE);
 	TIM_TimeBaseInitTypeDef timerInitStruct;
 	timerInitStruct.TIM_ClockDivision = 0;
 	timerInitStruct.TIM_CounterMode = TIM_CounterMode_Up;
 	timerInitStruct.TIM_Period = 1;	//1000 - 1 length of string
-	timerInitStruct.TIM_Prescaler = SystemCoreClock / (115200 - 1);	//115200 baudrate
+	timerInitStruct.TIM_Prescaler = SystemCoreClock / 28800 - 1;	/* makes a timer update freq of 14.4 kHz, this is about
+	the frequency characters are sent with ( 115200 / 8 = 14400 ) */
 	timerInitStruct.TIM_RepetitionCounter = 0;
 	TIM_TimeBaseInit(TIM6, &timerInitStruct);
 	TIM_ITConfig(TIM6, TIM_IT_Update, ENABLE);
+	TIM_ClearITPendingBit(TIM6, TIM_IT_Update);	// maybe it helps clearing the flag before enabling the nvic
+
+	// initialise NVIC for Usart Send
 	NVIC_InitTypeDef nvicUsartSend;
-	NVIC_EnableIRQ(TIM6_DAC_IRQn);
-	TIM_ClearITPendingBit(TIM6, TIM_IT_Update);		//interrupt is called in the beginning. even if timer is not activated yet
+	nvicUsartSend.NVIC_IRQChannel = TIM6_DAC_IRQn;
+	nvicUsartSend.NVIC_IRQChannelCmd = ENABLE;
+	nvicUsartSend.NVIC_IRQChannelPriority = 3; // can be 0 to 3
+	NVIC_Init(&nvicUsartSend);
+//	TIM_ClearITPendingBit(TIM6, TIM_IT_Update);		//interrupt is called in the beginning. even if timer is not activated yet
 	//WHY? How can you fix it? clearing the flag does not help.
 }
 

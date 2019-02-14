@@ -36,7 +36,11 @@ void lre_sensor_init(){
 
 	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOA,EXTI_PinSource4|EXTI_PinSource5 |EXTI_PinSource15);
 	//TODO: here you also have to change the PINsource, if every line has to be configured separately
-	NVIC_EnableIRQ(EXTI4_15_IRQn);
+	NVIC_InitTypeDef nvicSensor;
+	nvicSensor.NVIC_IRQChannel = EXTI4_15_IRQn;
+	nvicSensor.NVIC_IRQChannelCmd = ENABLE;
+	nvicSensor.NVIC_IRQChannelPriority = 1;	// can be 0 to 3
+	NVIC_Init(&nvicSensor);
 
 	//configure Timer
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1, ENABLE);
@@ -44,7 +48,7 @@ void lre_sensor_init(){
 	timerInitStruct.TIM_ClockDivision = 0;
 	timerInitStruct.TIM_CounterMode = TIM_CounterMode_Up;
 	timerInitStruct.TIM_Period = 60000 - 1;
-	timerInitStruct.TIM_Prescaler = SystemCoreClock / (1000000 - 1);
+	timerInitStruct.TIM_Prescaler = SystemCoreClock / 1000000 - 1;
 	timerInitStruct.TIM_RepetitionCounter = 0;
 	TIM_TimeBaseInit(TIM1, &timerInitStruct);
 
@@ -96,7 +100,7 @@ void EXTI4_15_IRQHandler(void){
 		}else{
 			//fallende Flanke
 			endTime[0] = TIM_GetCounter(TIM1);
-			mouse_distance[0] = (endTime[0] - startTime[0])*0.17; //[mm]
+			mouse_distance[0] = (uint16_t) (endTime[0] - startTime[0])*0.17; //[mm]
 		}
 		EXTI_ClearITPendingBit(EXTI_Line4);
 	}else if(EXTI_GetITStatus(EXTI_Line5) == SET){
@@ -108,7 +112,7 @@ void EXTI4_15_IRQHandler(void){
 		}else{
 			//fallende Flanke
 			endTime[1] = TIM_GetCounter(TIM1);
-			mouse_distance[1] = (endTime[1] - startTime[1])*0.17; //[mm]
+			mouse_distance[1] = (uint16_t) (endTime[1] - startTime[1])*0.17; //[mm]
 		}
 		EXTI_ClearITPendingBit(EXTI_Line5);
 	}else{
@@ -120,7 +124,7 @@ void EXTI4_15_IRQHandler(void){
 		}else{
 			//fallende Flanke
 			endTime[2] = TIM_GetCounter(TIM1);
-			mouse_distance[2] = (endTime[2] - startTime[2])*0.17; //[mm]
+			mouse_distance[2] = (uint16_t) (endTime[2] - startTime[2])*0.17; //[mm]
 		}
 		EXTI_ClearITPendingBit(EXTI_Line15);
 	}
