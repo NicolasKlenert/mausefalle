@@ -273,6 +273,7 @@ void stepper_acceleration_ramp(TIM_TypeDef *tim, stepper_struct *stepper)
 	if (stepper->step_freq == 0)
 	{
 		timer_period = 0xFFFF;
+		// TODO this could be a problem when going through zero and hitting zero exactly
 		TIM_Cmd(tim, DISABLE);
 		stepper->active = FALSE;
 	}
