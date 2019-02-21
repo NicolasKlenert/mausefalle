@@ -31,15 +31,18 @@ typedef struct{
 	int16_t controller_speed;   			// mm/s
 	int16_t controller_desired_distance;	// mm
 	int16_t wall_distance;					// mm
-	int16_t front_distance;
-	int16_t error;
-	int16_t corrector;
+	int16_t front_distance;					// mm
+	int16_t e;								// mm
+	int16_t corrector;						// mm/s
 	int16_t differential;
 	int16_t integral;
-	float thetaAlt;
-	int16_t dlAlt;
-	int16_t drAlt;
-	int16_t sensorAlt;
+
+//	int16_t start_decelerating				// mm
+
+//	float thetaAlt;
+//	int16_t dlAlt;
+//	int16_t drAlt;
+//	int16_t sensorAlt;
 
 }controller_struct;
 

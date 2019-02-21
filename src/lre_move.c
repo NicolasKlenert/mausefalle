@@ -20,8 +20,6 @@
 #define LRE_MOVE_TIMER_FREQ 10000 		// Frequency of TIM7 in Hz (minimum 734 Hz!!!)
 #define LRE_MOVE_TIMER_PERIOD (uint16_t)(( LRE_MOVE_TIMER_FREQ / LRE_MOVE_CONTROLLER_FREQ ) - 1 )	// Period of TIM7
 
-controller_struct controller = { 0, 0, 0, 0, 0, 0, 0 };
-
 // -------------------- functions -------------------------
 
 //positive degree is a rotation to the left!
@@ -33,8 +31,10 @@ void lre_move_rotate(int16_t degree) {
 	if (distanceToTravel < 0) {
 		speed *= -1;
 	}
-	lre_stepper_setSpeed(speed, STEPPER_RIGHT, distanceToTravel);
-	lre_stepper_setSpeed(-speed, STEPPER_LEFT, -distanceToTravel);
+	lre_stepper_setMaxDistance(distanceToTravel, STEPPER_RIGHT);
+	lre_stepper_setMaxDistance(-distanceToTravel, STEPPER_LEFT);
+	lre_stepper_setSpeed(speed, STEPPER_RIGHT);
+	lre_stepper_setSpeed(-speed, STEPPER_LEFT);
 	while (!lre_stepper_idle(STEPPER_BOTH)) {
 		//wait till stepper is finished
 	}
@@ -44,9 +44,11 @@ void lre_move_rotate(int16_t degree) {
 void lre_move_distance(int16_t distance) {
 	moveMode = MOVE_ACTIVE;
 	if (distance > 0) {
-		lre_stepper_setSpeed(LRE_MOVE_DEFAULT_SPEED, STEPPER_BOTH, distance);
+		lre_stepper_setMaxDistance(distance, STEPPER_BOTH);
+		lre_stepper_setSpeed(LRE_MOVE_DEFAULT_SPEED, STEPPER_BOTH);
 	} else {
-		lre_stepper_setSpeed(-LRE_MOVE_DEFAULT_SPEED, STEPPER_BOTH, distance);
+		lre_stepper_setMaxDistance(distance, STEPPER_BOTH);
+		lre_stepper_setSpeed(-LRE_MOVE_DEFAULT_SPEED, STEPPER_BOTH);
 	}
 	while (!lre_stepper_idle(STEPPER_BOTH)) {
 		//wait till stepper is finished
@@ -56,7 +58,8 @@ void lre_move_distance(int16_t distance) {
 
 void lre_move_speed(int8_t speed) {
 	moveMode = MOVE_ACTIVE;
-	lre_stepper_setSpeed(speed, STEPPER_BOTH, 0);
+	lre_stepper_setMaxDistance(0, STEPPER_BOTH);
+	lre_stepper_setSpeed(speed, STEPPER_BOTH);
 }
 
 void lre_move_stop() {
@@ -84,9 +87,6 @@ void lre_controller_init() {
 	// TIM init
 	TIM_TimeBaseInit(TIM7, &timerInitStruct);
 
-	// TIM start
-//	TIM_Cmd(TIM7, ENABLE);
-
 	// TIM7 enable update interrupt
 	TIM_ITConfig(TIM7, TIM_IT_Update, ENABLE);
 
@@ -96,7 +96,6 @@ void lre_controller_init() {
 	nvicTIM7.NVIC_IRQChannelCmd = ENABLE;
 	nvicTIM7.NVIC_IRQChannelPriority = 2;	// can be 0 to 3
 	NVIC_Init(&nvicTIM7);
-
 }
 
 // Timer fuer die Regelung anschalten
@@ -108,13 +107,15 @@ void lre_controller_start() {
 	TIM_Cmd(TIM7, ENABLE);
 	moveMode = MOVE_ACTIVE;
 	control_flag = FALSE;
-	controller.error = 0;
+	controller.e = 0;
 	controller.differential = 0;
 	controller.integral = 0;
-	controller.thetaAlt = 0;
-	controller.dlAlt = 0;
-	controller.drAlt = 0;
-	controller.sensorAlt = controller.wall_distance;
+
+
+//	controller.thetaAlt = 0;
+//	controller.dlAlt = 0;
+//	controller.drAlt = 0;
+//	controller.sensorAlt = controller.wall_distance;
 
 }
 // Timer fuer die Regelung abschalten
@@ -122,7 +123,8 @@ void lre_controller_stop() {
 	// Disable TIM7 IRQn (interrupt handler will not be called anymore)
 //	NVIC_DisableIRQ(TIM7_IRQn);
 	TIM_Cmd(TIM7, DISABLE);
-	lre_move_stop();
+	lre_stepper_stop(STEPPER_BOTH);
+	moveMode = MOVE_IDLE;
 
 	control_flag = TRUE;
 
@@ -149,26 +151,41 @@ void TIM7_IRQHandler(void) {
 		int rightWall = FALSE;
 		int leftWall = FALSE;
 
-		if ((int16_t) mouse_distance[0] > controller.front_distance) // check if mouse is to close to wall
+		// check if mouse is to close to front wall
+		if ( mouse_distance[0] < controller.front_distance)
+		{
+			lre_controller_stop();
+		}
+
+		//abort criteria because the desired distance is past
+		else if ((abs(lre_stepper_getMovedDistance(STEPPER_RIGHT)) > controller.controller_desired_distance)
+				&& (controller.controller_desired_distance != 0))
+		{
+			lre_controller_stop();
+		}
+		else
 		{
 			// ckeck if mouse sees a wall on the right or left
-			if ((int16_t) mouse_distance[2] <= (2 * controller.wall_distance))// ab 2 mal Wandabstand wird keine Wand erkannt.
-					{
+			if ( mouse_distance[2] <= (2 * controller.wall_distance))// ab 2 mal Wandabstand wird keine Wand erkannt.
+			{
 				rightWall = TRUE;
 				lre_ledOn(ledRight);
 			}
+			else lre_ledOff(ledRight);
 
 			if ((int16_t) mouse_distance[1] <= (2 * controller.wall_distance))// ab 2 mal Wandabstand wird keine Wand erkannt.
-					{
+			{
 				leftWall = TRUE;
 				lre_ledOn(ledLeft);
 			}
+			else lre_ledOff(ledLeft);
 
-			// Control algorithm depending on witch wall it sees
+			// Control algorithm depending on which wall it sees
 
 			// MODE 1: NO Wall
 			if ((leftWall == FALSE) && (rightWall == FALSE)) {
-				lre_stepper_setSpeed(controller.controller_speed, STEPPER_BOTH , controller.controller_desired_distance);
+				// TODO there is no point in sending desired distance every time, it will drive forever either way
+				lre_stepper_setSpeed(controller.controller_speed, STEPPER_BOTH);
 			}
 
 			// MODE 2: only left Wall
@@ -188,21 +205,8 @@ void TIM7_IRQHandler(void) {
 			if ((leftWall == TRUE) && (rightWall == TRUE)) {
 				lre_controller_bothWalls();
 			}
-
-		} else {
-			control_flag = TRUE;
 		}
 
-		//abort criteria because the desired distance is past
-		if ((abs(lre_stepper_getMovedDistance(STEPPER_RIGHT))
-				> controller.controller_desired_distance)
-				&& (controller.controller_desired_distance != 0)) {
-			control_flag = TRUE; //abort criteria because the desired distance is past
-		}
-
-		if (control_flag == TRUE) {
-			lre_controller_stop();
-		}
 		// reset interrupt pending bit
 		TIM_ClearITPendingBit(TIM7, TIM_IT_Update);
 	}

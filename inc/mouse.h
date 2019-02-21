@@ -12,7 +12,7 @@
 #include "stm32f072b_discovery.h"
 
 uint16_t mouse_status;
-uint16_t mouse_distance[3];	// vorne, rechts, links
+uint16_t mouse_distance[3];	// vorne, links, rechts
 float mouse_sensor_time[3];
 
 volatile uint16_t mouse_position;

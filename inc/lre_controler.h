@@ -25,6 +25,7 @@
 void lre_controller_leftWall(void);
 void lre_controller_rightWall(void);
 void lre_controller_bothWalls(void);
+int16_t actuating_variable_restiction(int16_t corrector, int16_t speed);
 uint8_t SensorMagic(int8_t mouseSide);
 int square(int b);
 
