@@ -17,7 +17,9 @@ void mouse_init(){
 uint16_t mouse_findPath(uint16_t aim, uint16_t *arr){
 	return getPath(mouse_position,aim,arr);
 }
-
+/*
+ * @param length: how many gates to set in this direction
+ * */
 void mouse_setGates(uint16_t directionRelativeToMouse, uint16_t length){
 	uint16_t tempPos = mouse_position;
 	uint16_t globalDirection = rotateDirection(mouse_direction,directionRelativeToMouse);
