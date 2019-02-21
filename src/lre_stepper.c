@@ -172,23 +172,40 @@ void lre_stepper_stop(uint8_t stepper_x)
  * @param max_distance: the maximal distance traveling is allowed in [mm]. If 0 is given, then is it seen as infinity
  *
  * */
-void lre_stepper_setSpeed(int8_t speed_mm_s, uint8_t stepper_x, int16_t max_distance)
+void lre_stepper_setSpeed(int8_t speed_mm_s, uint8_t stepper_x)
 {
 	if (stepper_x & STEPPER_RIGHT)
 	{
 		// TIM start
 		TIM_Cmd(TIM16, ENABLE);
-		stepper_right.desired_step_freq = (int16_t)( -speed_mm_s * STEPS_PER_MM );	// convert the speed to a step frequency
-		stepper_right.max_distance = max_distance;
+		stepper_right.desired_step_freq = (int16_t)( -speed_mm_s * STEPS_PER_MM );	// negativ so steppers turn in same direction
 		stepper_right.active = TRUE;
 	}
 	if (stepper_x & STEPPER_LEFT)
 	{
 		// TIM start
 		TIM_Cmd(TIM17, ENABLE);
-		stepper_left.desired_step_freq = (int16_t)( speed_mm_s * STEPS_PER_MM );	// negativ so steppers turn in same direction
-		stepper_left.max_distance = max_distance;
+		stepper_left.desired_step_freq = (int16_t)( speed_mm_s * STEPS_PER_MM );
 		stepper_left.active = TRUE;
+	}
+}
+
+/* Updates the desired distance in the stepper struct
+ *
+ * @param max_distance: the maximal distance traveling is allowed in [mm]. If 0 is given, then is it seen as infinity
+ * @param stepper_x: STEPPER_RIGHT or STEPPER_LEFT or STEPPER_BOTH
+ *
+ * */
+void lre_stepper_setMaxDistance(int16_t max_distance, uint8_t stepper_x)
+{
+	if (stepper_x & STEPPER_RIGHT)
+	{
+		stepper_right.max_distance = max_distance;
+	}
+	if (stepper_x & STEPPER_LEFT)
+	{
+		// TIM start
+		stepper_left.max_distance = max_distance;
 	}
 }
 
@@ -196,11 +213,11 @@ int16_t lre_stepper_getMovedDistance(uint8_t stepper_x)
 {
 	if (stepper_x & STEPPER_RIGHT)
 	{
-		return -stepper_right.current_step / STEPS_PER_MM;
+		return -stepper_right.current_step / STEPS_PER_MM;	// negativ because right stepper is inverted
 	}
 	if (stepper_x & STEPPER_LEFT)
 	{
-		return +stepper_left.current_step / STEPS_PER_MM;		// negativ because left stepper is inverted
+		return +stepper_left.current_step / STEPS_PER_MM;
 	}
 	send_usart_string("get_moved_distance kann den stepper nicht zuordnen");
 	return 0;
@@ -217,7 +234,6 @@ void stepper_nextStep(stepper_struct *stepper)
 {
 	uint16_t portValue = 0;
 
-	//TODO: beide steps sollten gleich schnell verlaufen
 	if (stepper->step_freq > 0)
 	{
 		stepper->counter++;
