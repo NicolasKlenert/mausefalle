@@ -13,7 +13,7 @@
 
 uint16_t mouse_status;
 uint16_t mouse_distance[3];	// vorne, links, rechts
-float mouse_sensor_time[3];
+//float mouse_sensor_time[3];
 
 volatile uint16_t mouse_position;
 volatile uint16_t mouse_direction;

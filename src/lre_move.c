@@ -15,10 +15,6 @@
 
 #define LRE_MOVE_DISTANCE_BETWEEN_WHEELS_MM	92	//distance between the middle of the wheels in mm
 #define LRE_MOVE_DEFAULT_SPEED 60
-// -------------------- (ControlLer Stuff) -------------------------
-#define LRE_MOVE_CONTROLLER_FREQ 50	// Frequency of Controller in Hz
-#define LRE_MOVE_TIMER_FREQ 10000 		// Frequency of TIM7 in Hz (minimum 734 Hz!!!)
-#define LRE_MOVE_TIMER_PERIOD (uint16_t)(( LRE_MOVE_TIMER_FREQ / LRE_MOVE_CONTROLLER_FREQ ) - 1 )	// Period of TIM7
 
 // -------------------- functions -------------------------
 
@@ -67,76 +63,14 @@ void lre_move_stop() {
 	moveMode = MOVE_IDLE;
 }
 
-// -------------------- CONTROLLER STUFF ---------------------
-
-// Timer fuer die Regelung initialisieren
-void lre_controller_init() {
-	// RCC enable TIM7
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM7, ENABLE);
-	// RCC enable Sysconfig for interrupts
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
-
-	// TIM init struct
-	TIM_TimeBaseInitTypeDef timerInitStruct;
-	timerInitStruct.TIM_ClockDivision = 0;
-	timerInitStruct.TIM_CounterMode = TIM_CounterMode_Up;
-	timerInitStruct.TIM_Period = LRE_MOVE_TIMER_PERIOD;
-	timerInitStruct.TIM_Prescaler = SystemCoreClock / LRE_MOVE_TIMER_FREQ - 1;
-	timerInitStruct.TIM_RepetitionCounter = 0;
-
-	// TIM init
-	TIM_TimeBaseInit(TIM7, &timerInitStruct);
-
-	// TIM7 enable update interrupt
-	TIM_ITConfig(TIM7, TIM_IT_Update, ENABLE);
-
-	// NVIC config and enable
-	NVIC_InitTypeDef nvicTIM7;
-	nvicTIM7.NVIC_IRQChannel = TIM7_IRQn;
-	nvicTIM7.NVIC_IRQChannelCmd = ENABLE;
-	nvicTIM7.NVIC_IRQChannelPriority = 2;	// can be 0 to 3
-	NVIC_Init(&nvicTIM7);
-}
-
-// Timer fuer die Regelung anschalten
-void lre_controller_start() {
-	// Enable TIM7 IRQn
-//	NVIC_EnableIRQ(TIM7_IRQn);
-	TIM_SetCounter(TIM7, 0);
-	TIM_ClearITPendingBit(TIM7, TIM_IT_Update);
-	TIM_Cmd(TIM7, ENABLE);
-	moveMode = MOVE_ACTIVE;
-	control_flag = FALSE;
-	controller.e = 0;
-	controller.differential = 0;
-	controller.integral = 0;
-
-
-//	controller.thetaAlt = 0;
-//	controller.dlAlt = 0;
-//	controller.drAlt = 0;
-//	controller.sensorAlt = controller.wall_distance;
-
-}
-// Timer fuer die Regelung abschalten
-void lre_controller_stop() {
-	// Disable TIM7 IRQn (interrupt handler will not be called anymore)
-//	NVIC_DisableIRQ(TIM7_IRQn);
-	TIM_Cmd(TIM7, DISABLE);
-	lre_stepper_stop(STEPPER_BOTH);
-	moveMode = MOVE_IDLE;
-
-	control_flag = TRUE;
-
-}
-
 /* move_straight setzt die Parameter des controller_structs auf von aussen gewuenschte Werte
  *
  */
 
 void lre_move_straight(int16_t speed, int16_t desired_distance,
 		int16_t wall_distance, int16_t front_distance) {
-	//TODO: think about starting the controller here
+
+	moveMode = MOVE_ACTIVE;
 	controller.controller_speed = speed;
 	controller.controller_desired_distance = desired_distance;
 	controller.wall_distance = wall_distance;
@@ -144,70 +78,11 @@ void lre_move_straight(int16_t speed, int16_t desired_distance,
 	lre_controller_start();
 }
 
-// Regelungsroutine Timer handler
-void TIM7_IRQHandler(void) {
-	// check which interrupt occurred
-	if (SET == TIM_GetITStatus(TIM7, TIM_IT_Update)) {
-		int rightWall = FALSE;
-		int leftWall = FALSE;
-
-		// check if mouse is to close to front wall
-		if ( mouse_distance[0] < controller.front_distance)
-		{
-			lre_controller_stop();
-		}
-
-		//abort criteria because the desired distance is past
-		else if ((abs(lre_stepper_getMovedDistance(STEPPER_RIGHT)) > controller.controller_desired_distance)
-				&& (controller.controller_desired_distance != 0))
-		{
-			lre_controller_stop();
-		}
-		else
-		{
-			// ckeck if mouse sees a wall on the right or left
-			if ( mouse_distance[2] <= (2 * controller.wall_distance))// ab 2 mal Wandabstand wird keine Wand erkannt.
-			{
-				rightWall = TRUE;
-				lre_ledOn(ledRight);
-			}
-			else lre_ledOff(ledRight);
-
-			if ((int16_t) mouse_distance[1] <= (2 * controller.wall_distance))// ab 2 mal Wandabstand wird keine Wand erkannt.
-			{
-				leftWall = TRUE;
-				lre_ledOn(ledLeft);
-			}
-			else lre_ledOff(ledLeft);
-
-			// Control algorithm depending on which wall it sees
-
-			// MODE 1: NO Wall
-			if ((leftWall == FALSE) && (rightWall == FALSE)) {
-				// TODO there is no point in sending desired distance every time, it will drive forever either way
-				lre_stepper_setSpeed(controller.controller_speed, STEPPER_BOTH);
-			}
-
-			// MODE 2: only left Wall
-			if ((leftWall == TRUE) && (rightWall == FALSE)) {
-				lre_controller_leftWall();
-				//send_usart_string("Linke Wand");
-			}
-
-			// MODE 3: only right Wall
-			if ((leftWall == FALSE) && (rightWall == TRUE)) {
-				lre_controller_rightWall();
-
-				//send_usart_string("Rechte Wand");
-			}
-
-			// MODE 4: both Wall
-			if ((leftWall == TRUE) && (rightWall == TRUE)) {
-				lre_controller_bothWalls();
-			}
-		}
-
-		// reset interrupt pending bit
-		TIM_ClearITPendingBit(TIM7, TIM_IT_Update);
+uint8_t lre_move_idle()
+{
+	if (moveMode == MOVE_ACTIVE)
+	{
+		return FALSE;
 	}
+	return TRUE;
 }

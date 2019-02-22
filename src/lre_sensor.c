@@ -87,6 +87,7 @@ void lre_sensor_init(){
 
 void lre_sensor_start(){
 	TIM_SetCompare1(TIM1, TRIGGERLENGTH);
+	TIM_SetCounter(TIM1, 0);
 	TIM_Cmd(TIM1, ENABLE);
 }
 

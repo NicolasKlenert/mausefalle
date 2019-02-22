@@ -46,6 +46,23 @@ void mapAll(){
 	//function to map the labyrinth.
 	//It searches till all cells are visited. The cells most adjacent to the mouse are chosen first.
 
+	/* Algorithm:
+	 *
+	 * 1. Check where the walls are (sensors) and set Gates
+	 * 2. Mark the current cell as visited
+	 * 3. Decide which cell to visit next
+	 * 4. Make the move a) straight or b) rotate
+	 * 5. Change a) position or b) direction
+	 *
+	 * Repeat these steps until arriving at goal, then get the shortest way back to start
+	 *
+	 * */
+
+	// stay in this loop until arriving at the goal (middle of the labyrinth)
+	while (mouse_position != goal)
+	{
+		setVisited(mouse_position);
+	}
 }
 
 void mouse_setStatus(uint16_t status){
