@@ -42,7 +42,7 @@ void mouse_setRightGates(uint16_t length){
 	mouse_setGates(1,length);
 }
 
-void mapAll(){
+void mapAll(uint16_t direction, uint16_t position){
 	//function to map the labyrinth.
 	//It searches till all cells are visited. The cells most adjacent to the mouse are chosen first.
 
@@ -58,10 +58,54 @@ void mapAll(){
 	 *
 	 * */
 
+	// variables
+	uint16_t neighbours[4] = {};
+	uint8_t numOfNeighbours = 0;
+	uint8_t global_direction = 0;
+	uint16_t nextCell = 0;
+
+	// first set the starting direction and position
+	mouse_position = position;
+	mouse_direction = direction;
+
 	// stay in this loop until arriving at the goal (middle of the labyrinth)
 	while (mouse_position != goal)
 	{
+		/* -------------------- Set Gates ------------------- */
+		// check walls to the front
+		mouse_setFrontGates( (uint16_t) (mouse_distance[0] / ROOM_WIDTH) );
+		// check walls to the left
+		mouse_setLeftGates( (uint16_t) (mouse_distance[1] / ROOM_WIDTH) );
+		// check walls to the right
+		mouse_setRightGates( (uint16_t) (mouse_distance[2] / ROOM_WIDTH) );
+
+		/* -------------------- Mark visited ------------------- */
 		setVisited(mouse_position);
+
+		/* -------------------- Decide which cell to visit next ------------------- */
+		global_direction = rotateDirection(mouse_direction, DIR_EAST);
+		if (hasGate(mouse_position, global_direction))
+		{
+			nextCell = getCellId(mouse_position, global_direction);
+		}
+		global_direction = rotateDirection(mouse_direction, DIR_NORTH);
+		if (hasGate(mouse_position, global_direction))
+		{
+			nextCell = getCellId(mouse_position, global_direction);
+		}
+		global_direction = rotateDirection(mouse_direction, DIR_WEST);
+		if (hasGate(mouse_position, global_direction))
+		{
+			nextCell = getCellId(mouse_position, global_direction);
+		}
+		global_direction = rotateDirection(mouse_direction, DIR_SOUTH);
+		if (hasGate(mouse_position, global_direction))
+		{
+			nextCell = getCellId(mouse_position, global_direction);
+		}
+
+
+		/* -------------------- Make the move ------------------- */
 	}
 }
 

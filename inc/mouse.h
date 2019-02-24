@@ -25,6 +25,7 @@ void mouse_setFrontGates(uint16_t length);
 void mouse_setLeftGates(uint16_t length);
 void mouse_setRightGates(uint16_t length);
 void mouse_setStatus(uint16_t status);
+uint8_t identifyGates(uint16_t distance);
 
 #define MOUSE_STANDBY 			0
 #define MOUSE_CRITICAL_ERROR 	1

@@ -20,6 +20,7 @@
 #define DIR_EAST		1
 #define DIR_SOUTH		2
 #define DIR_WEST		3
+#define ROOM_WIDTH      200
 
 #define leftWallChar '|'
 #define upperWallChar '_'
