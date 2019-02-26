@@ -86,7 +86,7 @@ void lre_usart_init(){
 	NVIC_InitTypeDef nvicUsartSend;
 	nvicUsartSend.NVIC_IRQChannel = TIM6_DAC_IRQn;
 	nvicUsartSend.NVIC_IRQChannelCmd = ENABLE;
-	nvicUsartSend.NVIC_IRQChannelPriority = 3; // can be 0 to 3
+	nvicUsartSend.NVIC_IRQChannelPriority = 2; // can be 0 to 3
 	NVIC_Init(&nvicUsartSend);
 //	TIM_ClearITPendingBit(TIM6, TIM_IT_Update);		//interrupt is called in the beginning. even if timer is not activated yet
 	//WHY? How can you fix it? clearing the flag does not help.

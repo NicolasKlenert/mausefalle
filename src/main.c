@@ -23,6 +23,9 @@
 #include "lre_controler.h"
 #include "mouse.h"
 #include "main.h"
+#include "labyrinth.h"
+#include "test.h"
+#include "lre_leds.h"
 
 void error(char* string){
 	mouse_setStatus(MOUSE_CRITICAL_ERROR);
@@ -31,6 +34,8 @@ void error(char* string){
 }
 
 int main(void){
+	// init lre_leds
+	lre_leds_init();
 	//init waiter
 	lre_wait_init();
 	// init controller
@@ -43,17 +48,24 @@ int main(void){
 	lre_communication_init();
 	//init sensors
 	lre_sensor_init();
-	//lre_gyro_init();
-	led_status_init();
+
+//	led_status_init();
 
 	// start stuff
-	lre_sensor_start();
+//	lre_sensor_start();
 
+//	labyrinth_init();
+//	testPathFinding();
+//	char arr[((numCols*widthRoom)+2)*(numRows*heightRoom)] = {0};
+//	printLabyrinth(arr);
+//	lre_wait(5000);
+//	send_usart_string(arr);
 
 		while(1){
-			lre_wait(5000);
+			lre_wait(1000);
 			char str[75] = "connection online";
 			send_usart_string(str);
+			lre_ledToggle(ledAll);
 
 		}
 

@@ -97,6 +97,10 @@ void lre_controller_init() {
 	// TIM init
 	TIM_TimeBaseInit(TIM7, &timerInitStruct);
 
+	TIM_Cmd(TIM7, DISABLE);
+	TIM_SetCounter(TIM7, 0);
+	TIM_ClearITPendingBit(TIM7, TIM_IT_Update);
+
 	// TIM7 enable update interrupt
 	TIM_ITConfig(TIM7, TIM_IT_Update, ENABLE);
 

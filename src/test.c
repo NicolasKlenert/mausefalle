@@ -17,10 +17,15 @@ uint16_t acceptableLabyrinth(){
 uint16_t testPathFinding(){
 	//create labyrinth
 	createFakeLabyrinth();
+	// set all cells visited
+	for (int i = 0; i < 49; i++)
+	{
+		setVisited(i);
+	}
 	//path from upper left corner: 0,7,14,15,22,29,36,37,44,45,38,31,32,33,26,27,20,19,12,11,18,17,16,23,24
 	uint16_t correct[25] = {0,7,14,15,22,29,36,37,44,45,38,31,32,33,26,27,20,19,12,11,18,17,16,23,24};
-	uint16_t path[numCols*numRows];
-	uint16_t count = getPath(0,25,path);
+	uint16_t path[numCols*numRows] = {0};
+	uint16_t count = getPath(0,goal,path);
 	for(int i = 0; i < 25; ++i){
 		if(path[count+i] != correct[i]) return FALSE;
 	}
