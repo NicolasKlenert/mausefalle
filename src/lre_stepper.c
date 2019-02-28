@@ -30,7 +30,7 @@ typedef struct{
 }stepper_struct;
 
 // variables
-stepper_struct stepper_left = {{
+stepper_struct stepper_right = {{
 		0b000100,
 		0b001100,
 		0b001000,
@@ -46,7 +46,7 @@ stepper_struct stepper_left = {{
 		0,
 		0,
 		0};
-stepper_struct stepper_right = {{
+stepper_struct stepper_left = {{
 		0b0001000000,
 		0b0011000000,
 		0b0010000000,
@@ -153,6 +153,7 @@ void lre_stepper_stop(uint8_t stepper_x)
 		stepper_right.active = FALSE;
 		TIM_SetAutoreload(TIM16, 0xFFFF);		// set the Timer period to maximum
 		TIM_Cmd(TIM16, DISABLE);
+//		GPIO_Write(GPIOB, stepper_right.reset_mask);	// reset Pins
 	}
 	if(stepper_x & STEPPER_LEFT){
 		stepper_left.desired_step_freq = 0;
@@ -162,6 +163,7 @@ void lre_stepper_stop(uint8_t stepper_x)
 		stepper_left.active = FALSE;
 		TIM_SetAutoreload(TIM17, 0xFFFF);		// set the Timer period to maximum
 		TIM_Cmd(TIM17, DISABLE);
+//		GPIO_Write(GPIOB, stepper_left.reset_mask);	// reset Pins
 	}
 }
 
@@ -178,14 +180,14 @@ void lre_stepper_setSpeed(int8_t speed_mm_s, uint8_t stepper_x)
 	{
 		// TIM start
 		TIM_Cmd(TIM16, ENABLE);
-		stepper_right.desired_step_freq = (int16_t)( -speed_mm_s * STEPS_PER_MM );	// negativ so steppers turn in same direction
+		stepper_right.desired_step_freq = (int16_t)( speed_mm_s * STEPS_PER_MM );
 		stepper_right.active = TRUE;
 	}
 	if (stepper_x & STEPPER_LEFT)
 	{
 		// TIM start
 		TIM_Cmd(TIM17, ENABLE);
-		stepper_left.desired_step_freq = (int16_t)( speed_mm_s * STEPS_PER_MM );
+		stepper_left.desired_step_freq = (int16_t)( -speed_mm_s * STEPS_PER_MM );	// negativ so steppers turn in same direction
 		stepper_left.active = TRUE;
 	}
 }

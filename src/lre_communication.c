@@ -15,6 +15,7 @@
 #include "lre_move.h"
 #include "mouse.h"
 #include "main.h"
+#include "lre_controler.h"
 /* argv[0] == "name"
  * argv[1] == "first argument"
  * ...
@@ -125,10 +126,11 @@ void lre_move(int argc, char **argv)
 
 	// move line
 	if ((argv[1][0]== 0x6C) && (argv[1][1]== 0x6E)) // first letter l, second letter n in hex
-	{	char str[40];
-		lre_move_straight(20, 0, 80, THRESHOLD_FRONT);
-		sprintf(str,"Vorne: %d", (int16_t)mouse_distance[0]);
-		send_usart_string(str);
+	{
+//		char str[40];
+		lre_move_straight(30, 0, THRESHOLD_SITE, THRESHOLD_FRONT);
+//		sprintf(str,"Vorne: %d", (int16_t)mouse_distance[0]);
+//		send_usart_string(str);
 
 	}
 	// move speed
@@ -140,7 +142,7 @@ void lre_move(int argc, char **argv)
 	// move stop
 	if ((argv[1][0]== 0x73) && (argv[1][1]== 0x74)) // first letter s, second letter t in hex
 	{
-		lre_move_stop();
+		lre_controller_stop();
 	}
 
 	// move distance

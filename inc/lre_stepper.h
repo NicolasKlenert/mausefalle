@@ -5,7 +5,7 @@
  *      Author: JoBire
  */
 
-//TODO invert left stepper direction
+
 
 #ifndef LRE_STEPPER_H_
 #define LRE_STEPPER_H_
@@ -19,7 +19,7 @@
 #define STEPPER_LEFT	0b10		// belongs to TIM17
 #define STEPPER_BOTH	0b11
 
-#define ACCELERATION (float)50.0			// acceleration in mm/s^2
+#define ACCELERATION (float)100.0			// acceleration in mm/s^2
 
 #define STEPPER_MAX_SPEED 90		// max speed in mm/s
 

@@ -61,8 +61,8 @@ void mouse_mapAll(uint16_t start_direction, uint16_t start_position){
 
 	// variables
 	uint8_t direction_right = 0;	// global direction relative to mouse right
-	uint8_t direction_straight = 0;	// global direction relative to mouse straight
 	uint8_t direction_left = 0;		// global direction relative to mouse left
+	uint8_t direction_back = 0;		// global direction relative to mouse back
 	uint16_t nextCell = 0;			// id of next Cell to visit
 	int16_t rotation = 0;			// degrees to turn
 
@@ -86,41 +86,46 @@ void mouse_mapAll(uint16_t start_direction, uint16_t start_position){
 
 		/* -------------------- Decide which cell to visit next ------------------- */
 		direction_right = rotateDirection(mouse_direction, DIR_EAST);
-		direction_straight = rotateDirection(mouse_direction, DIR_NORTH);
 		direction_left = rotateDirection(mouse_direction, DIR_WEST);
+		direction_back = rotateDirection(mouse_direction, DIR_SOUTH);
 
-		if (hasGate(mouse_position, direction_right))
+		if (hasGate(mouse_position, direction_right))	// go right
 		{
 			rotation = -90;
-			mouse_position = getCellId(mouse_position, direction_right);	// go right
+			mouse_position = getCellId(mouse_position, direction_right);	// update mouse position
 			mouse_direction = direction_right;
 		}
-		else if (hasGate(mouse_position, direction_straight))
+		else if (hasGate(mouse_position, mouse_direction))	// go straight
 		{
 			rotation = 0;
-			mouse_position = getCellId(mouse_position, direction_straight);	// go straight
-			mouse_direction = direction_straight;
+			mouse_position = getCellId(mouse_position, mouse_direction);	// update mouse position
 		}
-		else if (hasGate(mouse_position, direction_left))
+		else if (hasGate(mouse_position, direction_left))	// go left
 		{
 			rotation = 90;
-			mouse_position = getCellId(mouse_position, direction_left);	// go left
+			mouse_position = getCellId(mouse_position, direction_left);	// update mouse position
 			mouse_direction = direction_left;
 		}
-		else
+		else											// go back
 		{
 			rotation = 180;
-			mouse_position = getCellId(mouse_position, inverseDirection(mouse_direction));	// go back
-			mouse_direction = inverseDirection(mouse_direction);
+			mouse_position = getCellId(mouse_position, direction_back);	// update mouse position
+			mouse_direction = direction_back;
 		}
 
 		/* -------------------- Make the move ------------------- */
-
+		mouse_executeMove(rotation);
+		// wait till move is complete
+		while(!lre_move_idle())
+		{
+			// wait
+		}
 	}
 }
 
 void mouse_executeMove(int16_t rotation)
 {
+	// if there is no rotation, make the next move immediately
 	if (rotation == 0)
 	{
 		lre_move_straight(SPEED_MAPPING, ROOM_WIDTH, THRESHOLD_SITE, THRESHOLD_FRONT);

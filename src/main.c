@@ -26,6 +26,7 @@
 #include "labyrinth.h"
 #include "test.h"
 #include "lre_leds.h"
+#include "lre_execution_time.h"
 
 void error(char* string){
 	mouse_setStatus(MOUSE_CRITICAL_ERROR);
@@ -51,6 +52,8 @@ int main(void){
 
 	labyrinth_init();
 
+	lre_execution_time_init();
+
 	// start stuff
 	lre_sensor_start();
 
@@ -65,8 +68,10 @@ int main(void){
 			lre_wait(1000);
 			char str[75] = "connection online";
 			send_usart_string(str);
+
 			char distance[80];
-			sprintf(distance, "Vorne: %d; Links: %d; Rechts: %d", mouse_distance[0], mouse_distance[1], mouse_distance[2]);
+			sprintf(distance, "Time: %ld", execution_time);
+			//sprintf(distance, "Vorne: %d; Links: %d; Rechts: %d", mouse_distance[0], mouse_distance[1], mouse_distance[2]);
 			send_usart_string(distance);
 		}
 }

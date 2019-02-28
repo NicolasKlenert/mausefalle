@@ -6,10 +6,12 @@
  */
 #include "lre_controler.h"
 #include "lre_leds.h"
+#include "lre_execution_time.h"
+#include "labyrinth.h"
 
 
 // ---------------- control parameter (hand tuned) ------------ //
-#define K_P 10
+#define K_P 0.5
 #define K_D 0
 #define K_I 0
 
@@ -139,6 +141,7 @@ void lre_controller_stop() {
 
 // Regelungsroutine Timer handler
 void TIM7_IRQHandler(void) {
+	lre_execution_time_tic();
 	// check which interrupt occurred
 	if (SET == TIM_GetITStatus(TIM7, TIM_IT_Update)) {
 		int rightWall = FALSE;
@@ -159,14 +162,14 @@ void TIM7_IRQHandler(void) {
 		else
 		{
 			// ckeck if mouse sees a wall on the right or left
-			if ( mouse_distance[2] <= (2 * controller.wall_distance))// ab 2 mal Wandabstand wird keine Wand erkannt.
+			if ( mouse_distance[2] <= (3 * controller.wall_distance))// ab 3 mal Wandabstand wird keine Wand erkannt.
 			{
 				rightWall = TRUE;
 				lre_ledOn(ledRight);
 			}
 			else lre_ledOff(ledRight);
 
-			if ((int16_t) mouse_distance[1] <= (2 * controller.wall_distance))// ab 2 mal Wandabstand wird keine Wand erkannt.
+			if (mouse_distance[1] <= (3 * controller.wall_distance))// ab 3 mal Wandabstand wird keine Wand erkannt.
 			{
 				leftWall = TRUE;
 				lre_ledOn(ledLeft);
@@ -177,7 +180,6 @@ void TIM7_IRQHandler(void) {
 
 			// MODE 1: NO Wall
 			if ((leftWall == FALSE) && (rightWall == FALSE)) {
-				// TODO there is no point in sending desired distance every time, it will drive forever either way
 				lre_stepper_setSpeed(controller.controller_speed, STEPPER_BOTH);
 			}
 
@@ -203,6 +205,7 @@ void TIM7_IRQHandler(void) {
 		// reset interrupt pending bit
 		TIM_ClearITPendingBit(TIM7, TIM_IT_Update);
 	}
+	lre_execution_time_toc();
 }
 
 //uint8_t SensorMagic( int8_t mouseSide)

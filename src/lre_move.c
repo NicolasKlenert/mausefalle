@@ -61,6 +61,7 @@ void lre_move_speed(int8_t speed) {
 void lre_move_stop() {
 	lre_stepper_stop(STEPPER_BOTH);
 	moveMode = MOVE_IDLE;
+	//TODO controller stop???
 }
 
 /* move_straight setzt die Parameter des controller_structs auf von aussen gewuenschte Werte
@@ -71,6 +72,7 @@ void lre_move_straight(int16_t speed, int16_t desired_distance,
 		int16_t wall_distance, int16_t front_distance) {
 
 	moveMode = MOVE_ACTIVE;
+	nextCellVisible = NOT_VISIBLE;
 	controller.controller_speed = speed;
 	controller.controller_desired_distance = desired_distance;
 	controller.wall_distance = wall_distance;
@@ -85,4 +87,13 @@ uint8_t lre_move_idle()
 		return FALSE;
 	}
 	return TRUE;
+}
+
+uint8_t lre_move_nextCellVisible()
+{
+	if (nextCellVisible)
+	{
+		return TRUE;
+	}
+	return FALSE;
 }
