@@ -244,6 +244,8 @@ uint8_t getPath(uint16_t start, uint16_t aim, uint16_t *arr, uint8_t length){
 			}
 		}
 	}
+	// free memory
+	destroyQueue(queue);
 
 	//go through the visited array till we find the start again
 	uint16_t counter = length - 1;

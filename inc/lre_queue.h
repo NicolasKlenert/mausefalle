@@ -31,6 +31,7 @@ struct Queue{
 };
 
 struct Queue* createQueue(uint16_t capacity);
+void destroyQueue(struct Queue* queue);
 uint16_t isFull(struct Queue* queue);
 uint16_t isEmpty(struct Queue* queue);
 uint16_t enqueue(struct Queue* queue, uint16_t item);

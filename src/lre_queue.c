@@ -23,6 +23,12 @@ struct Queue* createQueue(uint16_t capacity){
 	return queue;
 }
 
+void destroyQueue(struct Queue* queue)
+{
+	free(queue->arr);
+	free(queue);
+}
+
 uint16_t isFull(struct Queue* queue){
 	return (queue->size == queue->capacity);
 }
