@@ -36,7 +36,7 @@
 //arr has to be ((numCols*widthRoom)+2)*(numRows*heightRoom) big
 void printLabyrinth(char *arr);
 void labyrinth_init();
-uint8_t getPath(uint16_t start, uint16_t aim, uint16_t *arr);
+uint8_t getPath(uint16_t start, uint16_t aim, uint16_t *arr, uint8_t length);
 void setWall(uint16_t id,uint8_t direction);
 void setGate(uint16_t id,uint8_t direction);
 void setWalls(uint16_t id,uint8_t bitflag);

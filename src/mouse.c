@@ -9,13 +9,14 @@
 #include "mouse.h"
 #include "labyrinth.h"
 #include "lre_led_status.h"
+#include "lre_move.h"
 
 void mouse_init(){
 	mouse_status = 0;
 }
 
-uint16_t mouse_findPath(uint16_t aim, uint16_t *arr){
-	return getPath(mouse_position,aim,arr);
+uint16_t mouse_findPath(uint16_t aim, uint16_t *arr, uint8_t length){
+	return getPath(mouse_position,aim,arr,length);
 }
 /*
  * @param length: how many gates to set in this direction
@@ -42,7 +43,7 @@ void mouse_setRightGates(uint16_t length){
 	mouse_setGates(1,length);
 }
 
-void mapAll(uint16_t direction, uint16_t position){
+void mouse_mapAll(uint16_t start_direction, uint16_t start_position){
 	//function to map the labyrinth.
 	//It searches till all cells are visited. The cells most adjacent to the mouse are chosen first.
 
@@ -59,14 +60,15 @@ void mapAll(uint16_t direction, uint16_t position){
 	 * */
 
 	// variables
-	uint16_t neighbours[4] = {};
-	uint8_t numOfNeighbours = 0;
-	uint8_t global_direction = 0;
-	uint16_t nextCell = 0;
+	uint8_t direction_right = 0;	// global direction relative to mouse right
+	uint8_t direction_straight = 0;	// global direction relative to mouse straight
+	uint8_t direction_left = 0;		// global direction relative to mouse left
+	uint16_t nextCell = 0;			// id of next Cell to visit
+	int16_t rotation = 0;			// degrees to turn
 
 	// first set the starting direction and position
-	mouse_position = position;
-	mouse_direction = direction;
+	mouse_position = start_position;
+	mouse_direction = start_direction;
 
 	// stay in this loop until arriving at the goal (middle of the labyrinth)
 	while (mouse_position != goal)
@@ -83,29 +85,54 @@ void mapAll(uint16_t direction, uint16_t position){
 		setVisited(mouse_position);
 
 		/* -------------------- Decide which cell to visit next ------------------- */
-		global_direction = rotateDirection(mouse_direction, DIR_EAST);
-		if (hasGate(mouse_position, global_direction))
-		{
-			nextCell = getCellId(mouse_position, global_direction);
-		}
-		global_direction = rotateDirection(mouse_direction, DIR_NORTH);
-		if (hasGate(mouse_position, global_direction))
-		{
-			nextCell = getCellId(mouse_position, global_direction);
-		}
-		global_direction = rotateDirection(mouse_direction, DIR_WEST);
-		if (hasGate(mouse_position, global_direction))
-		{
-			nextCell = getCellId(mouse_position, global_direction);
-		}
-		global_direction = rotateDirection(mouse_direction, DIR_SOUTH);
-		if (hasGate(mouse_position, global_direction))
-		{
-			nextCell = getCellId(mouse_position, global_direction);
-		}
+		direction_right = rotateDirection(mouse_direction, DIR_EAST);
+		direction_straight = rotateDirection(mouse_direction, DIR_NORTH);
+		direction_left = rotateDirection(mouse_direction, DIR_WEST);
 
+		if (hasGate(mouse_position, direction_right))
+		{
+			rotation = -90;
+			mouse_position = getCellId(mouse_position, direction_right);	// go right
+			mouse_direction = direction_right;
+		}
+		else if (hasGate(mouse_position, direction_straight))
+		{
+			rotation = 0;
+			mouse_position = getCellId(mouse_position, direction_straight);	// go straight
+			mouse_direction = direction_straight;
+		}
+		else if (hasGate(mouse_position, direction_left))
+		{
+			rotation = 90;
+			mouse_position = getCellId(mouse_position, direction_left);	// go left
+			mouse_direction = direction_left;
+		}
+		else
+		{
+			rotation = 180;
+			mouse_position = getCellId(mouse_position, inverseDirection(mouse_direction));	// go back
+			mouse_direction = inverseDirection(mouse_direction);
+		}
 
 		/* -------------------- Make the move ------------------- */
+
+	}
+}
+
+void mouse_executeMove(int16_t rotation)
+{
+	if (rotation == 0)
+	{
+		lre_move_straight(SPEED_MAPPING, ROOM_WIDTH, THRESHOLD_SITE, THRESHOLD_FRONT);
+	}
+	else
+	{
+		lre_move_rotate(rotation);
+		while(!lre_move_idle())
+		{
+			// wait
+		}
+		lre_move_straight(SPEED_MAPPING, ROOM_WIDTH, THRESHOLD_SITE, THRESHOLD_FRONT);
 	}
 }
 

@@ -25,7 +25,7 @@ uint16_t testPathFinding(){
 	//path from upper left corner: 0,7,14,15,22,29,36,37,44,45,38,31,32,33,26,27,20,19,12,11,18,17,16,23,24
 	uint16_t correct[25] = {0,7,14,15,22,29,36,37,44,45,38,31,32,33,26,27,20,19,12,11,18,17,16,23,24};
 	uint16_t path[numCols*numRows] = {0};
-	uint16_t count = getPath(0,goal,path);
+	uint16_t count = getPath(0, goal, path, numCols*numRows);
 	for(int i = 0; i < 25; ++i){
 		if(path[count+i] != correct[i]) return FALSE;
 	}
@@ -33,15 +33,15 @@ uint16_t testPathFinding(){
 }
 
 uint16_t testQueue(){
-	struct Queue* queue = createQueue(4);
+	struct Queue* queue = createQueue(49);
 	if(!dequeue(queue)) return FALSE;
 	enqueue(queue,1);
 	enqueue(queue,2);
 	enqueue(queue,3);
 	enqueue(queue,4);
-	if(!enqueue(queue,5)) return FALSE;
-	if(dequeue(queue) != 4) return FALSE;
-	if(dequeue(queue) != 3) return FALSE;
+//	if(enqueue(queue,5)) return FALSE;
+	if(dequeue(queue) != 1) return FALSE;
+	if(dequeue(queue) != 2) return FALSE;
 	return TRUE;
 }
 

@@ -49,13 +49,13 @@ int main(void){
 	//init sensors
 	lre_sensor_init();
 
-//	led_status_init();
+	labyrinth_init();
 
 	// start stuff
-//	lre_sensor_start();
+	lre_sensor_start();
 
-//	labyrinth_init();
 //	testPathFinding();
+//	uint16_t test = testQueue();
 //	char arr[((numCols*widthRoom)+2)*(numRows*heightRoom)] = {0};
 //	printLabyrinth(arr);
 //	lre_wait(5000);
@@ -65,10 +65,10 @@ int main(void){
 			lre_wait(1000);
 			char str[75] = "connection online";
 			send_usart_string(str);
-			lre_ledToggle(ledAll);
-
+			char distance[80];
+			sprintf(distance, "Vorne: %d; Links: %d; Rechts: %d", mouse_distance[0], mouse_distance[1], mouse_distance[2]);
+			send_usart_string(distance);
 		}
-
 }
 
 /*   Testprogramm vom 24.01.19 17:19 Uhr

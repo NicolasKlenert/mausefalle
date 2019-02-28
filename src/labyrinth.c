@@ -199,15 +199,23 @@ uint8_t getNeighbours(uint16_t id, uint16_t *arr){
 	}
 	return counter;
 }
-
-//IMPORTANT: the path is save on the end of the buffer array!
-uint8_t getPath(uint16_t start, uint16_t aim, uint16_t *arr){
+/*
+ * @param start: starting point of search
+ * @param aim: aim
+ * @param arr: array where the path is being stored
+ * @param length: length of arr
+ *
+ * IMPORTANT: the path is save on the end of the buffer array!
+ * */
+uint8_t getPath(uint16_t start, uint16_t aim, uint16_t *arr, uint8_t length){
 	//create queue and an visited array to make a BFS
 	uint16_t size = numRows*numCols;
-	if(sizeof(arr)/sizeof(arr[0]) < size){
+
+	if(length < size){
 		//length of buffer array has to be at least as much as the number of cells
 		return FALSE;
 	}
+
 	struct Queue* queue = createQueue(size);
 	uint16_t visited[size];
 	uint16_t nuller = size+1;
@@ -219,29 +227,26 @@ uint8_t getPath(uint16_t start, uint16_t aim, uint16_t *arr){
 	visited[start] = start;
 
 	uint8_t breaking = FALSE;
-	uint16_t item;
+	uint8_t numOfNeighbours = 0;
+	uint16_t item = 0;
 	uint16_t neighbours[4];
 	while(!isEmpty(queue) && !breaking){
 		item = dequeue(queue);
-		getNeighbours(item,neighbours);
-		for (int i = 0; neighbours[i] != nuller; i++){
-				if(visited[neighbours[i]] == nuller){
-					visited[neighbours[i]] = item;
-					if (neighbours[i] == aim){
-						breaking = TRUE;
-						break;
-					}
-					enqueue(queue,neighbours[i]);
+		numOfNeighbours = getNeighbours(item,neighbours);
+		for (int i = 0; i < numOfNeighbours; i++){
+			if(visited[neighbours[i]] == nuller){
+				visited[neighbours[i]] = item;
+				if (neighbours[i] == aim){
+					breaking = TRUE;
+					break;
 				}
+				enqueue(queue,neighbours[i]);
 			}
-		//empty neighbours so we can use it in the next iteration
-		for (int i = 0; neighbours[i] != nuller; i++){
-			neighbours[i] = nuller;
 		}
 	}
 
 	//go through the visited array till we find the start again
-	uint16_t counter = sizeof(arr)/sizeof(arr[0]);
+	uint16_t counter = length - 1;
 	arr[counter] = aim;
 	item = aim;
 	while(item != start && counter >= 0){
@@ -249,7 +254,7 @@ uint8_t getPath(uint16_t start, uint16_t aim, uint16_t *arr){
 		counter--;
 		arr[counter] = item;
 	}
-	return sizeof(arr)/sizeof(arr[0]) - counter;
+	return counter;	// counter points to the starting cell (nextCell = arr[counter + 1])
 }
 
 void createFakeLabyrinth(){

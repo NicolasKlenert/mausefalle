@@ -15,6 +15,7 @@ void createFakeLabyrinth();
 //tests if labyrinth has a border around it (and if you can go to the middle with all 4 corners)
 uint16_t acceptableLabyrinth();
 uint16_t testPathFinding();
+uint16_t testQueue();
 
 
 #endif /* TEST_H_ */
