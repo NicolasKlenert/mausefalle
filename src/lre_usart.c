@@ -105,6 +105,7 @@ void USART3_4_IRQHandler(void)
 	}
 }
 
+// TODO use TXE Interrupt instead of timer
 /**	Interrupt for sending Strings
  *
  */
