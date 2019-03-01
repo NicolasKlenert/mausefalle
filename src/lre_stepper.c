@@ -145,6 +145,8 @@ uint8_t lre_stepper_idle(uint8_t stepper_x){
 
 void lre_stepper_stop(uint8_t stepper_x)
 {
+	uint16_t portValue;
+
 	if(stepper_x & STEPPER_RIGHT){
 		stepper_right.desired_step_freq = 0;	// set desired step freq to 0
 		stepper_right.step_freq = 0;			// set step freq to 0
@@ -153,7 +155,9 @@ void lre_stepper_stop(uint8_t stepper_x)
 		stepper_right.active = FALSE;
 		TIM_SetAutoreload(TIM16, 0xFFFF);		// set the Timer period to maximum
 		TIM_Cmd(TIM16, DISABLE);
-//		GPIO_Write(GPIOB, stepper_right.reset_mask);	// reset Pins
+		portValue = GPIO_ReadOutputData(GPIOB);	// read old GPIOB Data
+		portValue &= stepper_right.reset_mask;	// reset stepper Pins
+		GPIO_Write(GPIOB, portValue);			// reset Pins to save Power
 	}
 	if(stepper_x & STEPPER_LEFT){
 		stepper_left.desired_step_freq = 0;
@@ -163,7 +167,9 @@ void lre_stepper_stop(uint8_t stepper_x)
 		stepper_left.active = FALSE;
 		TIM_SetAutoreload(TIM17, 0xFFFF);		// set the Timer period to maximum
 		TIM_Cmd(TIM17, DISABLE);
-//		GPIO_Write(GPIOB, stepper_left.reset_mask);	// reset Pins
+		portValue = GPIO_ReadOutputData(GPIOB);	// read old GPIOB Data
+		portValue &= stepper_left.reset_mask;	// reset stepper Pins
+		GPIO_Write(GPIOB, portValue);			// reset Pins to save Power
 	}
 }
 

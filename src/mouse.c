@@ -63,7 +63,6 @@ void mouse_mapAll(uint16_t start_direction, uint16_t start_position){
 	uint8_t direction_right = 0;	// global direction relative to mouse right
 	uint8_t direction_left = 0;		// global direction relative to mouse left
 	uint8_t direction_back = 0;		// global direction relative to mouse back
-	uint16_t nextCell = 0;			// id of next Cell to visit
 	int16_t rotation = 0;			// degrees to turn
 
 	// first set the starting direction and position
@@ -93,7 +92,7 @@ void mouse_mapAll(uint16_t start_direction, uint16_t start_position){
 		{
 			rotation = -90;
 			mouse_position = getCellId(mouse_position, direction_right);	// update mouse position
-			mouse_direction = direction_right;
+			mouse_direction = direction_right;								// update mouse direction
 		}
 		else if (hasGate(mouse_position, mouse_direction))	// go straight
 		{
@@ -103,41 +102,63 @@ void mouse_mapAll(uint16_t start_direction, uint16_t start_position){
 		else if (hasGate(mouse_position, direction_left))	// go left
 		{
 			rotation = 90;
-			mouse_position = getCellId(mouse_position, direction_left);	// update mouse position
-			mouse_direction = direction_left;
+			mouse_position = getCellId(mouse_position, direction_left);		// update mouse position
+			mouse_direction = direction_left;								// update mouse direction
 		}
 		else											// go back
 		{
 			rotation = 180;
-			mouse_position = getCellId(mouse_position, direction_back);	// update mouse position
-			mouse_direction = direction_back;
+			mouse_position = getCellId(mouse_position, direction_back);		// update mouse position
+			mouse_direction = direction_back;								// update mouse direction
 		}
 
 		/* -------------------- Make the move ------------------- */
 		mouse_executeMove(rotation);
-		// wait till move is complete
-		while(!lre_move_idle())
-		{
-			// wait
-		}
 	}
+}
+
+/* mouse will run along the path that is provided in arr
+ * @param arr: pointer to array where the path is saved
+ * @param length: length of array
+ *
+ * */
+void mouse_Run(uint16_t* arr, uint8_t length)
+{
+
 }
 
 void mouse_executeMove(int16_t rotation)
 {
-	// if there is no rotation, make the next move immediately
+	// if there is no rotation, try to make the next move immediately (fluent driving on a straight path)
 	if (rotation == 0)
 	{
-		lre_move_straight(SPEED_MAPPING, ROOM_WIDTH, THRESHOLD_SITE, THRESHOLD_FRONT);
+		if (!lre_move_idle())
+		{
+			// just alter distance if mouse is still moving
+			lre_move_straight_alter_distance(ROOM_WIDTH);
+		}
+		else
+		{
+			// new move if last move is already complete
+			lre_move_straight(SPEED_MAPPING, ROOM_WIDTH, THRESHOLD_SITE, THRESHOLD_FRONT);
+		}
 	}
 	else
 	{
+		while (!lre_move_idle())	// Wait for the previous move to finish
+		{
+			// wait
+		}
 		lre_move_rotate(rotation);
-		while(!lre_move_idle())
+		while (!lre_move_idle())		// wait for the rotation to finish
 		{
 			// wait
 		}
 		lre_move_straight(SPEED_MAPPING, ROOM_WIDTH, THRESHOLD_SITE, THRESHOLD_FRONT);
+	}
+	while (!lre_move_idle() && !lre_move_nextCellVisible())
+	{
+		// wait till next cell is visible or the move is completed
 	}
 }
 

@@ -142,19 +142,24 @@ void lre_controller_stop() {
 // Regelungsroutine Timer handler
 void TIM7_IRQHandler(void) {
 	lre_execution_time_tic();
+
 	// check which interrupt occurred
 	if (SET == TIM_GetITStatus(TIM7, TIM_IT_Update)) {
-		int rightWall = FALSE;
-		int leftWall = FALSE;
+		uint8_t rightWall = FALSE;
+		uint8_t leftWall = FALSE;
+		// get moved distance (average of both steppers)
+		int16_t movedDistance = (abs(lre_stepper_getMovedDistance(STEPPER_RIGHT))
+				+ abs(lre_stepper_getMovedDistance(STEPPER_LEFT))) / 2;
 
 		// check if mouse is to close to front wall
 		if ( mouse_distance[0] < controller.front_distance)
 		{
 			lre_controller_stop();
+			//TODO show that an error happened
 		}
 
 		//abort criteria because the desired distance is past
-		else if ((abs(lre_stepper_getMovedDistance(STEPPER_RIGHT)) > controller.controller_desired_distance)
+		else if (( movedDistance > controller.controller_desired_distance)
 				&& (controller.controller_desired_distance != 0))
 		{
 			lre_controller_stop();
@@ -201,7 +206,11 @@ void TIM7_IRQHandler(void) {
 				lre_controller_bothWalls();
 			}
 		}
-
+		// check if sensors are already looking into the next cell
+		if (( controller.controller_desired_distance - movedDistance ) < DISTANCE_VISIBLE)
+		{
+			nextCellVisible = VISIBLE;
+		}
 		// reset interrupt pending bit
 		TIM_ClearITPendingBit(TIM7, TIM_IT_Update);
 	}

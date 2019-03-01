@@ -20,7 +20,8 @@
 #define VISIBLE 1
 #define THRESHOLD_FRONT 45 // in mm
 #define THRESHOLD_SITE 50 // in mm
-
+#define DISTANCE_VISIBLE 80 	/* when the distance that is left to travel is lower than DISTANCE_VISIBLE,
+									the sensors are already looking into the next cell and decisions can be made */
 
 // ---------------- global variables------------ //
 
@@ -35,6 +36,7 @@ void lre_move_distance(int16_t distance);
 void lre_move_speed(int8_t speed);
 void lre_move_stop();
 void lre_move_straight(int16_t speed, int16_t desired_distance, int16_t wall_distance, int16_t front_distance);
+void lre_move_straight_alter_distance(int16_t distance);
 uint8_t lre_move_nextCellVisible();
 uint8_t lre_move_idle();
 
