@@ -75,8 +75,8 @@ void lre_usart_init(){
 	timerInitStruct.TIM_ClockDivision = 0;
 	timerInitStruct.TIM_CounterMode = TIM_CounterMode_Up;
 	timerInitStruct.TIM_Period = 1;	//1000 - 1 length of string
-	timerInitStruct.TIM_Prescaler = SystemCoreClock / 28800 - 1;	/* makes a timer update freq of 14.4 kHz, this is about
-	the frequency characters are sent with ( 115200 / 8 = 14400 ) */
+	timerInitStruct.TIM_Prescaler = SystemCoreClock / 20000 - 1;	/* makes a timer update freq of 10.0 kHz, this is about
+	the frequency characters are sent with ( 115200 / 10 = 11520 ) */
 	timerInitStruct.TIM_RepetitionCounter = 0;
 	TIM_TimeBaseInit(TIM6, &timerInitStruct);
 	TIM_ITConfig(TIM6, TIM_IT_Update, ENABLE);
