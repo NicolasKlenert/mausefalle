@@ -155,6 +155,7 @@ void mouse_executeMove(int16_t rotation)
 			// wait
 		}
 		lre_move_straight(SPEED_MAPPING, ROOM_WIDTH, THRESHOLD_SITE, THRESHOLD_FRONT);
+//		lre_move_distance(ROOM_WIDTH);
 	}
 	while (!lre_move_idle() && !lre_move_nextCellVisible())
 	{
