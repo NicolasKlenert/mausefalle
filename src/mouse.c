@@ -10,6 +10,9 @@
 #include "labyrinth.h"
 #include "lre_led_status.h"
 #include "lre_move.h"
+#include "lre_stepper.h"
+#include "lre_usart.h"
+#include "lre_leds.h"
 
 void mouse_init(){
 	mouse_status = 0;
@@ -113,7 +116,9 @@ void mouse_mapAll(uint16_t start_direction, uint16_t start_position){
 		}
 
 		/* -------------------- Make the move ------------------- */
+
 		mouse_executeMove(rotation);
+
 	}
 }
 
@@ -134,8 +139,8 @@ void mouse_executeMove(int16_t rotation)
 	{
 		if (!lre_move_idle())
 		{
-			// just alter distance if mouse is still moving
-			lre_move_straight_alter_distance(ROOM_WIDTH);
+		// just alter distance if mouse is still moving
+			//lre_move_straight_alter_distance(ROOM_WIDTH);
 		}
 		else
 		{
@@ -145,10 +150,10 @@ void mouse_executeMove(int16_t rotation)
 	}
 	else
 	{
-		while (!lre_move_idle())	// Wait for the previous move to finish
+	/*	while (!lre_move_idle())	// Wait for the previous move to finish
 		{
 			// wait
-		}
+		}*/
 		lre_move_rotate(rotation);
 		while (!lre_move_idle())		// wait for the rotation to finish
 		{
@@ -156,11 +161,13 @@ void mouse_executeMove(int16_t rotation)
 		}
 		lre_move_straight(SPEED_MAPPING, ROOM_WIDTH, THRESHOLD_SITE, THRESHOLD_FRONT);
 //		lre_move_distance(ROOM_WIDTH);
+
 	}
-	while (!lre_move_idle() && !lre_move_nextCellVisible())
+	while (!lre_move_idle())// && !lre_move_nextCellVisible())
 	{
 		// wait till next cell is visible or the move is completed
 	}
+	lre_ledToggle(ledDown);
 }
 
 void mouse_setStatus(uint16_t status){

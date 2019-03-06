@@ -133,10 +133,8 @@ void lre_move(int argc, char **argv)
 	// move line
 	if ((argv[1][0]== 0x6C) && (argv[1][1]== 0x6E)) // first letter l, second letter n in hex
 	{
-//		char str[40];
-		lre_move_straight(60, 0, THRESHOLD_SITE, THRESHOLD_FRONT);
-//		sprintf(str,"Vorne: %d", (int16_t)mouse_distance[0]);
-//		send_usart_string(str);
+		int16_t distance_line = cmd_str2Num(argv[2], (uint8_t)10);
+		lre_move_straight(60, distance_line, THRESHOLD_SITE, THRESHOLD_FRONT);
 
 	}
 	// move speed
