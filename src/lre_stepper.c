@@ -119,10 +119,9 @@ void lre_stepper_init(void)
 	 * do this by starting with step 8 and decrement down
 	 * to zero for both steppers */
 
-	portValue = GPIO_ReadOutputData(GPIOB);	// read old GPIOB Data
-
 	for (int8_t i = 7; i >= 0; i--)
 	{
+		portValue = GPIO_ReadOutputData(GPIOB);	// read old GPIOB Data
 		portValue &= stepper_right.reset_mask;	// reset stepper right Pins
 		portValue &= stepper_left.reset_mask;	// reset stepper left Pins
 		portValue |= stepper_right.step_table[i];	// set new Pins right
@@ -130,6 +129,11 @@ void lre_stepper_init(void)
 		GPIO_Write(GPIOB, portValue);	// write new Pins
 		lre_wait(10);		// equals a step freq of 100 Hz
 	}
+	// Reset steppers to save energy
+	portValue = GPIO_ReadOutputData(GPIOB);	// read old GPIOB Data
+	portValue &= stepper_right.reset_mask;	// reset stepper right Pins
+	portValue &= stepper_left.reset_mask;	// reset stepper left Pins
+	GPIO_Write(GPIOB, portValue);	// write new Pins
 }
 
 //returns state of stepper. (used to know if stepper is disabled)

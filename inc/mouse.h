@@ -11,8 +11,8 @@
 #include "stm32f0xx.h"
 #include "stm32f072b_discovery.h"
 
-#define SPEED_MAPPING 60
-#define SPEED_RUNNING 80
+#define SPEED_MAPPING 50
+#define SPEED_RUNNING 60
 
 uint16_t mouse_status;
 uint16_t mouse_distance[3];	// vorne, links, rechts

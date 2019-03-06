@@ -167,14 +167,14 @@ void TIM7_IRQHandler(void) {
 		else
 		{
 			// ckeck if mouse sees a wall on the right or left
-			if ( mouse_distance[2] <= (3 * controller.wall_distance))// ab 3 mal Wandabstand wird keine Wand erkannt.
+			if ( mouse_distance[2] <= (2 * controller.wall_distance))// ab 2 mal Wandabstand wird keine Wand erkannt.
 			{
 				rightWall = TRUE;
 				lre_ledOn(ledRight);
 			}
 			else lre_ledOff(ledRight);
 
-			if (mouse_distance[1] <= (3 * controller.wall_distance))// ab 3 mal Wandabstand wird keine Wand erkannt.
+			if (mouse_distance[1] <= (2 * controller.wall_distance))// ab 2 mal Wandabstand wird keine Wand erkannt.
 			{
 				leftWall = TRUE;
 				lre_ledOn(ledLeft);
@@ -207,10 +207,10 @@ void TIM7_IRQHandler(void) {
 			}
 		}
 		// check if sensors are already looking into the next cell
-		if (( controller.controller_desired_distance - movedDistance ) < DISTANCE_VISIBLE)
-		{
-			nextCellVisible = VISIBLE;
-		}
+//		if (( controller.controller_desired_distance - movedDistance ) < DISTANCE_VISIBLE)
+//		{
+//			nextCellVisible = VISIBLE;
+//		}
 		// reset interrupt pending bit
 		TIM_ClearITPendingBit(TIM7, TIM_IT_Update);
 	}

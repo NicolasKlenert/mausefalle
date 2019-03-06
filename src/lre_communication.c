@@ -16,6 +16,7 @@
 #include "mouse.h"
 #include "main.h"
 #include "lre_controler.h"
+#include "labyrinth.h"
 /* argv[0] == "name"
  * argv[1] == "first argument"
  * ...
@@ -71,9 +72,6 @@ void lre_maneuver(int argc, char **argv)
 
 		//lre_move_straight(50, 2000, distance1, 45);
 		lre_move_distance(2000);
-
-
-
 	}
 	// corner: "ma co"
 	if ( (argv[1][0]=='c') && (argv[1][1]=='o') )
@@ -91,6 +89,14 @@ void lre_maneuver(int argc, char **argv)
 			//
 		}
 		lre_move_distance(700);
+	}
+
+	// map all: "ma map position direction"
+	if ( (argv[1][0] == 'm' ) && (argv[1][1] == 'a') && (argv[1][2] == 'p') )
+	{
+		int16_t position = cmd_str2Num(argv[2], (uint8_t)10);
+		int16_t direction = cmd_str2Num(argv[3], (uint8_t)10);
+		mouse_mapAll(direction, position);
 	}
 }
 
@@ -128,7 +134,7 @@ void lre_move(int argc, char **argv)
 	if ((argv[1][0]== 0x6C) && (argv[1][1]== 0x6E)) // first letter l, second letter n in hex
 	{
 //		char str[40];
-		lre_move_straight(30, 0, THRESHOLD_SITE, THRESHOLD_FRONT);
+		lre_move_straight(60, 0, THRESHOLD_SITE, THRESHOLD_FRONT);
 //		sprintf(str,"Vorne: %d", (int16_t)mouse_distance[0]);
 //		send_usart_string(str);
 
@@ -174,6 +180,5 @@ void lre_maze_com(int argc, char **argv)
 	{
 
 	}
-
 }
 
