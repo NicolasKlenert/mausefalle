@@ -155,6 +155,7 @@ void lre_stepper_stop(uint8_t stepper_x)
 		stepper_right.desired_step_freq = 0;	// set desired step freq to 0
 		stepper_right.step_freq = 0;			// set step freq to 0
 		stepper_right.current_step = 0;
+		stepper_right.max_distance = 0;
 		//disable stepper
 		stepper_right.active = FALSE;
 		TIM_SetAutoreload(TIM16, 0xFFFF);		// set the Timer period to maximum
@@ -167,6 +168,7 @@ void lre_stepper_stop(uint8_t stepper_x)
 		stepper_left.desired_step_freq = 0;
 		stepper_left.step_freq = 0;
 		stepper_left.current_step = 0;
+		stepper_left.max_distance = 0;
 		//disable stepper
 		stepper_left.active = FALSE;
 		TIM_SetAutoreload(TIM17, 0xFFFF);		// set the Timer period to maximum
@@ -225,11 +227,11 @@ int16_t lre_stepper_getMovedDistance(uint8_t stepper_x)
 {
 	if (stepper_x & STEPPER_RIGHT)
 	{
-		return -stepper_right.current_step / STEPS_PER_MM;	// negativ because right stepper is inverted
+		return stepper_right.current_step / STEPS_PER_MM;
 	}
 	if (stepper_x & STEPPER_LEFT)
 	{
-		return +stepper_left.current_step / STEPS_PER_MM;
+		return -stepper_left.current_step / STEPS_PER_MM;
 	}
 	send_usart_string("get_moved_distance kann den stepper nicht zuordnen");
 	return 0;
@@ -302,8 +304,8 @@ void stepper_acceleration_ramp(TIM_TypeDef *tim, stepper_struct *stepper)
 	{
 		timer_period = 0xFFFF;
 		// TODO this could be a problem when going through zero and hitting zero exactly
-		TIM_Cmd(tim, DISABLE);
-		stepper->active = FALSE;
+//		TIM_Cmd(tim, DISABLE);
+//		stepper->active = FALSE;
 	}
 	else
 	{

@@ -12,6 +12,7 @@
 #include "lre_move.h"
 #include "lre_stepper.h"
 #include "lre_usart.h"
+#include "stdio.h"
 #include "lre_leds.h"
 
 void mouse_init(){
@@ -46,7 +47,7 @@ void mouse_setRightGates(uint16_t length){
 	mouse_setGates(1,length);
 }
 
-void mouse_mapAll(uint16_t start_direction, uint16_t start_position){
+void mouse_mapAll(){
 	//function to map the labyrinth.
 	//It searches till all cells are visited. The cells most adjacent to the mouse are chosen first.
 
@@ -68,10 +69,6 @@ void mouse_mapAll(uint16_t start_direction, uint16_t start_position){
 	uint8_t direction_back = 0;		// global direction relative to mouse back
 	int16_t rotation = 0;			// degrees to turn
 
-	// first set the starting direction and position
-	mouse_position = start_position;
-	mouse_direction = start_direction;
-
 	// stay in this loop until arriving at the goal (middle of the labyrinth)
 	while (mouse_position != goal)
 	{
@@ -85,6 +82,9 @@ void mouse_mapAll(uint16_t start_direction, uint16_t start_position){
 
 		/* -------------------- Mark visited ------------------- */
 		setVisited(mouse_position);
+		char str[50];
+		sprintf(str,"Cell %d, Direction %d",mouse_position, mouse_direction);
+		send_usart_string(str);
 
 		/* -------------------- Decide which cell to visit next ------------------- */
 		direction_right = rotateDirection(mouse_direction, DIR_EAST);

@@ -94,9 +94,9 @@ void lre_maneuver(int argc, char **argv)
 	// map all: "ma map position direction"
 	if ( (argv[1][0] == 'm' ) && (argv[1][1] == 'a') && (argv[1][2] == 'p') )
 	{
-		int16_t position = cmd_str2Num(argv[2], (uint8_t)10);
-		int16_t direction = cmd_str2Num(argv[3], (uint8_t)10);
-		mouse_mapAll(direction, position);
+		mouse_position = cmd_str2Num(argv[2], (uint8_t)10);
+		mouse_direction = cmd_str2Num(argv[3], (uint8_t)10);
+		flag_mapAll = TRUE;
 	}
 }
 

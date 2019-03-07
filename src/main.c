@@ -10,8 +10,6 @@
 
 
 #include <lre_communication.h>
-#include "stm32f0xx.h"
-#include "stm32f072b_discovery.h"
 #include "stdio.h"
 #include "lre_led_status.h"
 #include "lre_wait.h"
@@ -57,6 +55,8 @@ int main(void){
 	// start stuff
 	lre_sensor_start();
 
+	flag_mapAll = 0;
+
 //	testPathFinding();
 //	uint16_t test = testQueue();
 //	char arr[((numCols*widthRoom)+2)*(numRows*heightRoom)] = {0};
@@ -65,13 +65,18 @@ int main(void){
 //	send_usart_string(arr);
 
 		while(1){
-			lre_wait(1000);
+
+			if (flag_mapAll)
+			{
+				mouse_mapAll();
+			}
+			lre_wait(200);
 			char str[75] = "connection online";
 			send_usart_string(str);
 
 			char distance[80];
-			sprintf(distance, "Time: %ld", execution_time);
-			//sprintf(distance, "Vorne: %d; Links: %d; Rechts: %d", mouse_distance[0], mouse_distance[1], mouse_distance[2]);
+//			sprintf(distance, "Time: %ld", execution_time);
+			sprintf(distance, "Vorne: %d; Links: %d; Rechts: %d", mouse_distance[0], mouse_distance[1], mouse_distance[2]);
 			send_usart_string(distance);
 		}
 }

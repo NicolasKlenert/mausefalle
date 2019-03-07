@@ -8,6 +8,8 @@
 #include "lre_leds.h"
 #include "lre_execution_time.h"
 #include "labyrinth.h"
+#include "lre_usart.h"
+#include "stdio.h"
 
 
 // ---------------- control parameter (hand tuned) ------------ //
@@ -74,6 +76,10 @@ int16_t actuating_variable_restiction(int16_t corrector, int16_t speed)
 	if (corrector + speed > STEPPER_MAX_SPEED)
 	{
 		return STEPPER_MAX_SPEED - speed;
+	}
+	else if (speed - corrector < 1)
+	{
+		return speed - 1;
 	}
 	else
 	{
@@ -142,14 +148,20 @@ void lre_controller_stop() {
 // Regelungsroutine Timer handler
 void TIM7_IRQHandler(void) {
 	lre_execution_time_tic();
+	char str[50];
 
 	// check which interrupt occurred
 	if (SET == TIM_GetITStatus(TIM7, TIM_IT_Update)) {
 		uint8_t rightWall = FALSE;
 		uint8_t leftWall = FALSE;
 		// get moved distance (average of both steppers)
-		int16_t movedDistance = (abs(lre_stepper_getMovedDistance(STEPPER_RIGHT))
-				+ abs(lre_stepper_getMovedDistance(STEPPER_LEFT))) / 2;
+		int16_t movedDistanceLeft = lre_stepper_getMovedDistance(STEPPER_LEFT);
+		int16_t movedDistanceRight = lre_stepper_getMovedDistance(STEPPER_RIGHT);
+		int16_t movedDistance = (abs(movedDistanceLeft)
+				+ abs(movedDistanceRight)) / 2;
+
+//		sprintf(str, "%d %d", movedDistanceLeft,movedDistanceRight);
+//		send_usart_string(str);
 
 		// check if mouse is to close to front wall
 		if ( mouse_distance[0] < controller.front_distance)
@@ -166,7 +178,7 @@ void TIM7_IRQHandler(void) {
 		}
 		else
 		{
-			// ckeck if mouse sees a wall on the right or left
+			// ckeck if mouse sees a wall on the right or left or front
 			if ( mouse_distance[2] <= (2 * controller.wall_distance))// ab 2 mal Wandabstand wird keine Wand erkannt.
 			{
 				rightWall = TRUE;
@@ -180,6 +192,12 @@ void TIM7_IRQHandler(void) {
 				lre_ledOn(ledLeft);
 			}
 			else lre_ledOff(ledLeft);
+
+			if (mouse_distance[0] <= (2 * controller.wall_distance))// ab 2 mal Wandabstand wird keine Wand erkannt.
+			{
+				lre_ledOn(ledUp);
+			}
+			else lre_ledOff(ledUp);
 
 			// Control algorithm depending on which wall it sees
 

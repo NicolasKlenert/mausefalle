@@ -29,7 +29,7 @@ void mouse_setLeftGates(uint16_t length);
 void mouse_setRightGates(uint16_t length);
 void mouse_setStatus(uint16_t status);
 uint8_t identifyGates(uint16_t distance);
-void mouse_mapAll(uint16_t start_direction, uint16_t start_position);
+void mouse_mapAll();
 void mouse_executeMove(int16_t rotation);
 
 #define MOUSE_STANDBY 			0
