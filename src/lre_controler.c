@@ -148,7 +148,6 @@ void lre_controller_stop() {
 // Regelungsroutine Timer handler
 void TIM7_IRQHandler(void) {
 	lre_execution_time_tic();
-	char str[50];
 
 	// check which interrupt occurred
 	if (SET == TIM_GetITStatus(TIM7, TIM_IT_Update)) {
@@ -157,7 +156,7 @@ void TIM7_IRQHandler(void) {
 		// get moved distance (average of both steppers)
 		int16_t movedDistanceLeft = lre_stepper_getMovedDistance(STEPPER_LEFT);
 		int16_t movedDistanceRight = lre_stepper_getMovedDistance(STEPPER_RIGHT);
-		int16_t movedDistance = (abs(movedDistanceLeft)
+		controller.controller_movedDistance = (abs(movedDistanceLeft)
 				+ abs(movedDistanceRight)) / 2;
 
 //		sprintf(str, "%d %d", movedDistanceLeft,movedDistanceRight);
@@ -168,10 +167,11 @@ void TIM7_IRQHandler(void) {
 		{
 			lre_controller_stop();
 			//TODO show that an error happened
+			send_usart_string("Too close to front wall!");
 		}
 
 		//abort criteria because the desired distance is past
-		else if (( movedDistance > controller.controller_desired_distance)
+		else if (( controller.controller_movedDistance > controller.controller_desired_distance)
 				&& (controller.controller_desired_distance != 0))
 		{
 			lre_controller_stop();

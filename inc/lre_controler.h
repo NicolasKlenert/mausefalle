@@ -29,6 +29,7 @@ typedef struct{
 	int16_t corrector;						// mm/s
 	int16_t differential;
 	int16_t integral;
+	int16_t controller_movedDistance;
 
 //	int16_t start_decelerating				// mm
 

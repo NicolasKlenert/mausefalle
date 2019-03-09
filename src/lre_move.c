@@ -76,6 +76,7 @@ void lre_move_straight(int16_t speed, int16_t desired_distance,
 	controller.controller_desired_distance = desired_distance;
 	controller.wall_distance = wall_distance;
 	controller.front_distance = front_distance;
+	controller.controller_movedDistance = 0;
 	lre_controller_start();
 }
 

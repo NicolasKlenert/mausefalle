@@ -57,6 +57,10 @@ int main(void){
 
 	flag_mapAll = 0;
 
+	/* -------------- Variables ---------------------- */
+	uint16_t path[numCols*numRows] = {0};
+	uint8_t position_in_path = 0;
+
 //	testPathFinding();
 //	uint16_t test = testQueue();
 //	char arr[((numCols*widthRoom)+2)*(numRows*heightRoom)] = {0};
@@ -68,7 +72,9 @@ int main(void){
 
 			if (flag_mapAll)
 			{
-				mouse_mapAll();
+				mouse_mapAll(mouse_start_position, mouse_start_direction);		// map labyrinth
+				position_in_path = mouse_findPath(mouse_start_position, path, numCols*numRows);	// find path
+				mouse_Run(path, numCols*numRows, position_in_path);		// run back to start
 			}
 			lre_wait(200);
 			char str[75] = "connection online";
