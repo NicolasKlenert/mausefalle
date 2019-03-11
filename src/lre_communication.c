@@ -94,9 +94,18 @@ void lre_maneuver(int argc, char **argv)
 	// map all: "ma map position direction"
 	if ( (argv[1][0] == 'm' ) && (argv[1][1] == 'a') && (argv[1][2] == 'p') )
 	{
-		mouse_position = cmd_str2Num(argv[2], (uint8_t)10);
-		mouse_direction = cmd_str2Num(argv[3], (uint8_t)10);
+		mouse_start_position = cmd_str2Num(argv[2], (uint8_t)10);
+		mouse_start_direction = cmd_str2Num(argv[3], (uint8_t)10);
 		flag_mapAll = TRUE;
+	}
+
+	// run: "ma run position direction aim"
+	if ( (argv[1][0] == 'r' ) && (argv[1][1] == 'u') && (argv[1][2] == 'n') )
+	{
+		mouse_start_position = cmd_str2Num(argv[2], (uint8_t)10);
+		mouse_start_direction = cmd_str2Num(argv[3], (uint8_t)10);
+		mouse_aim = cmd_str2Num(argv[4], (uint8_t)10);
+		flag_run = TRUE;
 	}
 }
 

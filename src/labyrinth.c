@@ -153,7 +153,7 @@ uint8_t hasGate(uint16_t id,uint8_t direction){
 	return cells[id] & (1 << direction);
 }
 
-uint16_t getCellId(uint16_t id,uint8_t direction){
+int16_t getCellId(int16_t id,uint8_t direction){
 	switch (direction) {
 		case 0:
 			return id - numCols;

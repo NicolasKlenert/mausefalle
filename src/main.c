@@ -56,6 +56,7 @@ int main(void){
 	lre_sensor_start();
 
 	flag_mapAll = 0;
+	flag_run = 0;
 
 	/* -------------- Variables ---------------------- */
 	uint16_t path[numCols*numRows] = {0};
@@ -75,15 +76,29 @@ int main(void){
 				mouse_mapAll(mouse_start_position, mouse_start_direction);		// map labyrinth
 				position_in_path = mouse_findPath(mouse_start_position, path, numCols*numRows);	// find path
 				mouse_Run(path, numCols*numRows, position_in_path);		// run back to start
+				flag_mapAll = FALSE;
 			}
-			lre_wait(200);
+			if (flag_run)
+			{
+				createFakeLabyrinth();
+				for (int i = 0; i < 49; i++)
+				{
+					setVisited(i);
+				}
+				mouse_setDirection(mouse_start_direction);
+				mouse_setPosition(mouse_start_position);
+				position_in_path = mouse_findPath(mouse_aim, path, numCols*numRows);	// find path
+				mouse_Run(path, numCols*numRows, position_in_path);		// run to aim
+				flag_run = FALSE;
+			}
+			lre_wait(2000);
 			char str[75] = "connection online";
 			send_usart_string(str);
 
-			char distance[80];
+//			char distance[80];
 //			sprintf(distance, "Time: %ld", execution_time);
-			sprintf(distance, "Vorne: %d; Links: %d; Rechts: %d", mouse_distance[0], mouse_distance[1], mouse_distance[2]);
-			send_usart_string(distance);
+//			sprintf(distance, "Vorne: %d; Links: %d; Rechts: %d", mouse_distance[0], mouse_distance[1], mouse_distance[2]);
+//			send_usart_string(distance);
 		}
 }
 

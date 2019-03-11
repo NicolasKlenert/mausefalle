@@ -224,6 +224,9 @@ void TIM7_IRQHandler(void) {
 				lre_controller_bothWalls();
 			}
 		}
+		char str[50];
+//		sprintf(str, "V: %d", mouse_distance[0]);
+//		send_usart_string(str);
 		// check if sensors are already looking into the next cell
 //		if (( controller.controller_desired_distance - movedDistance ) < DISTANCE_VISIBLE)
 //		{

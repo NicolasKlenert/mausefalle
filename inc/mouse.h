@@ -12,16 +12,17 @@
 #include "stm32f072b_discovery.h"
 
 #define SPEED_MAPPING 50
-#define SPEED_RUNNING 60
+#define SPEED_RUNNING 70
 
 uint16_t mouse_status;
 uint16_t mouse_distance[3];	// vorne, links, rechts
 //float mouse_sensor_time[3];
 
-static volatile uint16_t mouse_position;
-static volatile uint16_t mouse_direction;
-volatile uint16_t mouse_start_position;
-volatile uint16_t mouse_start_direction;
+static volatile int16_t mouse_position;
+static volatile int16_t mouse_direction;
+volatile int16_t mouse_start_position;
+volatile int16_t mouse_start_direction;
+volatile int16_t mouse_aim;
 
 void mouse_init();
 uint8_t mouse_findPath(uint16_t aim, uint16_t *arr, uint8_t length);

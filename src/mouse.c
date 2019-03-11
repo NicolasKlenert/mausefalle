@@ -7,6 +7,7 @@
  */
 
 #include "mouse.h"
+#include "lre_wait.h"
 #include "labyrinth.h"
 #include "lre_led_status.h"
 #include "lre_move.h"
@@ -36,6 +37,11 @@ void mouse_setGates(uint16_t directionRelativeToMouse, uint16_t length){
 	}
 }
 
+void mouse_setWall(uint16_t directionRelativeToMouse){
+	uint16_t globalDirection = rotateDirection(mouse_direction,directionRelativeToMouse);
+	setWall(mouse_position, globalDirection);
+}
+
 void mouse_setFrontGates(uint16_t length){
 	mouse_setGates(0,length);
 }
@@ -46,6 +52,18 @@ void mouse_setLeftGates(uint16_t length){
 
 void mouse_setRightGates(uint16_t length){
 	mouse_setGates(1,length);
+}
+
+void mouse_setFrontWall(){
+	mouse_setWall(0);
+}
+
+void mouse_setLeftWall(){
+	mouse_setWall(3);
+}
+
+void mouse_setRightWall(){
+	mouse_setWall(1);
 }
 
 void mouse_mapAll(uint16_t position, uint16_t direction){
@@ -79,37 +97,58 @@ void mouse_mapAll(uint16_t position, uint16_t direction){
 	// stay in this loop until arriving at the goal (middle of the labyrinth)
 	while (mouse_position != goal)
 	{
-		/* ------------------- Check previous move -----------*/
-		if (controller.controller_movedDistance < 100)
-		{
-			send_usart_string("Move wasn't complete, going back!");
-			// mouse stopped due to an error or because of a front wall, move wasn't finished
-			lre_move_distance(-controller.controller_movedDistance); // go backwards
-		}
-		else	// move was successful, update position an direction
-		{
-			mouse_setPosition(new_position);
-			mouse_setDirection(new_direction);
-		}
 
 		/* -------------------- Set Gates ------------------- */
+		if (mouse_distance[0] > 120)
+		{
+			mouse_setFrontGates(1);
+		}
+		else
+		{
+			mouse_setFrontWall();
+		}
+
+		if (mouse_distance[1] > 120)
+		{
+			mouse_setLeftGates(1);
+		}
+		else
+		{
+			mouse_setLeftWall();
+		}
+
+		if (mouse_distance[2] > 120)
+		{
+			mouse_setRightGates(1);
+		}
+		else
+		{
+			mouse_setRightWall();
+		}
+
 		// check walls to the front
-		mouse_setFrontGates( (uint16_t) (mouse_distance[0] / ROOM_WIDTH) );
-		// check walls to the left
-		mouse_setLeftGates( (uint16_t) (mouse_distance[1] / ROOM_WIDTH) );
-		// check walls to the right
-		mouse_setRightGates( (uint16_t) (mouse_distance[2] / ROOM_WIDTH) );
+//		mouse_setFrontGates( (uint16_t) (mouse_distance[0] / ROOM_WIDTH) );
+//		// check walls to the left
+//		mouse_setLeftGates( (uint16_t) (mouse_distance[1] / ROOM_WIDTH) );
+//		// check walls to the right
+//		mouse_setRightGates( (uint16_t) (mouse_distance[2] / ROOM_WIDTH) );
 
 		/* -------------------- Mark visited ------------------- */
 		setVisited(mouse_getPosition());
-		char str[50];
-		sprintf(str,"Cell %d, Direction %d",mouse_getPosition(), mouse_getDirection());
-		send_usart_string(str);
 
 		/* -------------------- Decide which cell to visit next ------------------- */
 		direction_right = rotateDirection(mouse_getDirection(), DIR_EAST);
 		direction_left = rotateDirection(mouse_getDirection(), DIR_WEST);
 		direction_back = rotateDirection(mouse_getDirection(), DIR_SOUTH);
+
+		// TEST
+		char str[50];
+		sprintf(str,"Cell %d, Direction %d, Vorne: %d",mouse_getPosition(), mouse_getDirection(), mouse_distance[0]);
+		send_usart_string(str);
+		char arr[((numCols*widthRoom)+2)*(numRows*heightRoom)] = {0};
+		printLabyrinth(arr);
+		send_usart_string(arr);
+//		lre_wait(1000);
 
 		if (hasGate(mouse_getPosition(), direction_right))	// go right
 		{
@@ -139,7 +178,36 @@ void mouse_mapAll(uint16_t position, uint16_t direction){
 		/* -------------------- Make the move ------------------- */
 
 		mouse_executeMove(rotation);
+
+		/* ------------------- Check previous move -----------*/
+		if (controller.controller_movedDistance < 130 && controller.controller_movedDistance > 10)
+		{
+			lre_wait(100);
+			send_usart_string("Move wasn't complete! Going same distance back!");
+			// mouse stopped due to an error or because of a front wall, move wasn't finished
+			lre_move_distance(-controller.controller_movedDistance);
+			while(!lre_move_idle())
+			{
+				// wait
+			}
+			//lre_move_straight(SPEED_MAPPING, ROOM_WIDTH - controller.controller_movedDistance, THRESHOLD_SITE, THRESHOLD_FRONT); // go backwards
+		}
+		else if (controller.controller_movedDistance <= 10)
+		{
+			send_usart_string("Move wasn't complete! Going 20mm back!");
+			lre_move_distance(-20);
+			while(!lre_move_idle())
+			{
+				// wait
+			}
+		}
+		else	// move was successful, update position an direction
+		{
+			mouse_setPosition(new_position);
+			mouse_setDirection(new_direction);
+		}
 	}
+	send_usart_string("Yippiiieee!! I made it! Going back now...");
 }
 
 /* mouse will run along the path that is provided in arr
@@ -149,40 +217,31 @@ void mouse_mapAll(uint16_t position, uint16_t direction){
  * */
 void mouse_Run(uint16_t* arr, uint8_t length, uint8_t position_in_path)
 {
-	uint8_t counter = position_in_path;
+	uint8_t counter = position_in_path + 1;
 	int16_t rotation = 0;
 	uint16_t new_position = 0;
 	uint16_t new_direction = 0;
 	uint16_t direction_right = 0;	// global direction relative to mouse right
 	uint16_t direction_left = 0;		// global direction relative to mouse left
+	uint16_t direction_back = 0;
 	uint16_t id_right = 0;
 	uint16_t id_straight = 0;
 	uint16_t id_left = 0;
+	uint16_t id_back = 0;
 
 	while (counter < length)
 	{
-		if (controller.controller_movedDistance < 100)
-		{
-			send_usart_string("Move wasn't complete, going back!");
-			// mouse stopped due to an error or because of a front wall, move wasn't finished
-			lre_move_distance(-controller.controller_movedDistance); // go backwards
-		}
-		else	// move was successful, update position an direction
-		{
-			mouse_setPosition(new_position);
-			mouse_setDirection(new_direction);
-			counter++;
-		}
-
 		char str[50];
 		sprintf(str,"Cell %d, Direction %d",mouse_getPosition(), mouse_getDirection());
 		send_usart_string(str);
 
 		direction_right = rotateDirection(mouse_getDirection(), DIR_EAST);
 		direction_left = rotateDirection(mouse_getDirection(), DIR_WEST);
+		direction_back = rotateDirection(mouse_getDirection(), DIR_SOUTH);
 		id_right = getCellId(mouse_getPosition(), direction_right);
 		id_left = getCellId(mouse_getPosition(), direction_left);
 		id_straight = getCellId(mouse_getPosition(), mouse_getDirection());
+		id_back = getCellId(mouse_getPosition(), direction_back);
 
 		if ( id_right == arr[counter] )
 		{
@@ -202,15 +261,36 @@ void mouse_Run(uint16_t* arr, uint8_t length, uint8_t position_in_path)
 			new_position = id_straight;	// update mouse position
 			new_direction = mouse_getDirection();
 		}
+		else if ( id_back == arr[counter] )
+		{
+			rotation = 180;
+			new_position = id_back;	// update mouse position
+			new_direction = direction_back;
+		}
 		else
 		{
 			send_usart_string("Help! I'm lost!!!");
 			while (1)
 			{
-
+				//
 			}
 		}
 		mouse_executeMove(rotation);
+
+		/* ----------------- Check if move was complete --------------- */
+
+		if (controller.controller_movedDistance < 100)
+		{
+			send_usart_string("Move wasn't complete, going back!");
+			// mouse stopped due to an error or because of a front wall, move wasn't finished
+			lre_move_distance(-controller.controller_movedDistance); // go backwards
+		}
+		else	// move was successful, update position an direction
+		{
+			mouse_setPosition(new_position);
+			mouse_setDirection(new_direction);
+			counter++;
+		}
 	}
 }
 
@@ -219,35 +299,20 @@ void mouse_executeMove(int16_t rotation)
 	// if there is no rotation, try to make the next move immediately (fluent driving on a straight path)
 	if (rotation == 0)
 	{
-		if (!lre_move_idle())
-		{
-		// just alter distance if mouse is still moving
-			//lre_move_straight_alter_distance(ROOM_WIDTH);
-		}
-		else
-		{
-			// new move if last move is already complete
-			lre_move_straight(SPEED_MAPPING, ROOM_WIDTH, THRESHOLD_SITE, THRESHOLD_FRONT);
-		}
+		lre_move_straight(SPEED_MAPPING, ROOM_WIDTH, THRESHOLD_SITE, THRESHOLD_FRONT);
 	}
 	else
 	{
-	/*	while (!lre_move_idle())	// Wait for the previous move to finish
-		{
-			// wait
-		}*/
 		lre_move_rotate(rotation);
 		while (!lre_move_idle())		// wait for the rotation to finish
 		{
 			// wait
 		}
 		lre_move_straight(SPEED_MAPPING, ROOM_WIDTH, THRESHOLD_SITE, THRESHOLD_FRONT);
-//		lre_move_distance(ROOM_WIDTH);
-
 	}
-	while (!lre_move_idle())// && !lre_move_nextCellVisible())
+	while (!lre_move_idle())
 	{
-		// wait till next cell is visible or the move is completed
+		// wait till the move is completed
 	}
 	lre_ledToggle(ledDown);
 }

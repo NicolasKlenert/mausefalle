@@ -19,5 +19,6 @@ void error(char* string);
 
 // flags
 uint8_t flag_mapAll;
+uint8_t flag_run;
 
 #endif /* MAIN_H_ */

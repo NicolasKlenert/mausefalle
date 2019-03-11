@@ -42,9 +42,13 @@ void lre_move_distance(int16_t distance) {
 	if (distance > 0) {
 		lre_stepper_setMaxDistance(distance, STEPPER_BOTH);
 		lre_stepper_setSpeed(LRE_MOVE_DEFAULT_SPEED, STEPPER_BOTH);
-	} else {
+	} else if (distance < 0) {
 		lre_stepper_setMaxDistance(distance, STEPPER_BOTH);
 		lre_stepper_setSpeed(-LRE_MOVE_DEFAULT_SPEED, STEPPER_BOTH);
+	}
+	else
+	{
+		send_usart_string("lre_move_distance: invalid argument!");
 	}
 	while (!lre_stepper_idle(STEPPER_BOTH)) {
 		//wait till stepper is finished
